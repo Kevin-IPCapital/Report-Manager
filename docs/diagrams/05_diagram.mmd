@@ -1,0 +1,16 @@
+sequenceDiagram
+  participant B as Browser
+  participant D as Django API
+  participant PG as PostgreSQL
+  B->>D: GET /api/sections/patches?client=3
+  D->>D: Validate token and parameters
+  D->>PG: org units linked to client 3
+  D->>PG: newest and previous usable inventories for those devices
+  D->>PG: devices grouped by customer (client filter choices)
+  PG-->>D: counts per type and category
+  D->>D: Score with this user's weights over the shared weights
+  D-->>B: types, scores, overall, client choices
+  B->>D: GET /api/sections/tickets?from=...&to=...
+  D->>PG: newest version of each ticket, created in range
+  D-->>B: ticket rows
+  B->>B: filter, group, average, sort, paginate in the browser

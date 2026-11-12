@@ -1,0 +1,12 @@
+flowchart TD
+  T[collection_alerts every 5 min] --> H[Read job logs, stored data age, schedules, heartbeat]
+  H --> R[Apply rules: worker silent, failed, stuck, overdue, no data]
+  R --> P[Compare with alert state]
+  P --> N{Anything new, due for reminder, or cleared?}
+  N -- No --> X[Exit quietly]
+  N -- Yes --> E{Recipients configured?}
+  E -- No --> W[Warn, record nothing]
+  E -- Yes --> M[Send one email]
+  M --> OK{Sent?}
+  OK -- Yes --> S[Record what was announced]
+  OK -- No --> F[Record nothing, retry next run]

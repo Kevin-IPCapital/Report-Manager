@@ -1,0 +1,31 @@
+erDiagram
+  customers {
+    integer id PK
+  }
+  snapshot {
+    bigint snapshot_id PK
+  }
+  company {
+    bigint snapshot_id PK, FK
+    bigint company_id PK
+  }
+  ticket {
+    bigint snapshot_id PK, FK
+    bigint ticket_id PK
+    bigint company_id FK
+  }
+  ticket_note {
+    bigint snapshot_id PK, FK
+    bigint note_id PK
+    bigint ticket_id FK
+  }
+  contact {
+    bigint snapshot_id PK, FK
+    bigint contact_id PK
+    bigint company_id FK
+  }
+  snapshot ||--o{ company : "snapshot_id"
+  company ||--o{ ticket : "snapshot_id, company_id"
+  ticket ||--o{ ticket_note : "snapshot_id, ticket_id"
+  company ||--o{ contact : "snapshot_id, company_id"
+  company |o..o{ customers : "autotask_company_id: directory entry to company (by ID, not enforced)"

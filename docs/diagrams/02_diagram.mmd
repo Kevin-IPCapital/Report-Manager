@@ -1,0 +1,31 @@
+sequenceDiagram
+  participant U as Staff user
+  participant R as Data Collection page
+  participant D as Django collector API
+  participant Q as SQLite queue
+  participant S as Scheduler (task or run_scheduler)
+  participant W as collection_worker
+  participant C as run_collection / collector script
+  participant P as PostgreSQL source schema
+  U->>R: Rerun or Update All
+  R->>D: POST /api/collectors/run
+  D->>D: Authenticate, staff check, allowlist
+  D->>Q: enqueue batch if none active
+  D-->>R: 202 queued, batch_id
+  loop polling
+    R->>D: GET /api/collectors/execution
+    D->>Q: batch, schedules, heartbeat
+    D-->>R: state
+  end
+  S->>W: tick (every minute)
+  W->>Q: heartbeat, claim batch (exclusive lock)
+  loop each job
+    W->>C: run_collection job (child process)
+    C->>P: write source records
+    loop while it runs
+      W->>Q: heartbeat every 30 seconds
+    end
+    C-->>W: exit code + log
+    W->>Q: SUCCESS / PARTIAL / FAILED + duration
+  end
+  W->>Q: finish batch, heartbeat IDLE

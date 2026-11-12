@@ -1,0 +1,1085 @@
+{
+  "comment": "Shared by frontend/src/report/config.test.js and backend/api/test_reports.py: the browser and the server must accept and reject exactly the same templates, and normalise them identically.",
+  "cases": [
+    {
+      "name": "a minimal version 2 template gets its defaults",
+      "input": {
+        "version": 2,
+        "blocks": [
+          {
+            "type": "tickets"
+          }
+        ]
+      },
+      "expect": {
+        "version": 2,
+        "title": "IP Capital Management Report",
+        "annex": false,
+        "maxRows": 200,
+        "period": {
+          "from": "",
+          "to": ""
+        },
+        "weights": {},
+        "blocks": [
+          {
+            "id": "b1",
+            "type": "tickets",
+            "title": "",
+            "filters": {
+              "customer": "",
+              "priority": "",
+              "ticketStatus": "",
+              "ticketType": "",
+              "issueType": "",
+              "subIssueType": ""
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "a full version 2 template is kept, with titles trimmed",
+      "input": {
+        "version": 2,
+        "title": "  Monthly pack  ",
+        "annex": true,
+        "maxRows": 50,
+        "period": {
+          "from": "2026-10-01",
+          "to": "2026-10-31"
+        },
+        "weights": {
+          "windows-security": 2,
+          "third-party:app": 0,
+          "windows-patching:": 1.5
+        },
+        "blocks": [
+          {
+            "id": "acme",
+            "type": "tickets",
+            "title": "  Acme tickets ",
+            "filters": {
+              "customer": "Acme",
+              "priority": "Critical"
+            }
+          },
+          {
+            "id": "scope",
+            "type": "patches",
+            "filters": {
+              "patchType": "windows-security",
+              "patchScope": "client:3"
+            }
+          },
+          {
+            "id": "cove",
+            "type": "backups",
+            "filters": {
+              "backupHealth": "CRITICAL"
+            }
+          }
+        ]
+      },
+      "expect": {
+        "version": 2,
+        "title": "Monthly pack",
+        "annex": true,
+        "maxRows": 50,
+        "period": {
+          "from": "2026-10-01",
+          "to": "2026-10-31"
+        },
+        "weights": {
+          "windows-security": 2,
+          "third-party:app": 0,
+          "windows-patching:": 1.5
+        },
+        "blocks": [
+          {
+            "id": "acme",
+            "type": "tickets",
+            "title": "Acme tickets",
+            "filters": {
+              "customer": "Acme",
+              "priority": "Critical",
+              "ticketStatus": "",
+              "ticketType": "",
+              "issueType": "",
+              "subIssueType": ""
+            }
+          },
+          {
+            "id": "scope",
+            "type": "patches",
+            "title": "",
+            "filters": {
+              "patchType": "windows-security",
+              "patchScope": "client:3"
+            }
+          },
+          {
+            "id": "cove",
+            "type": "backups",
+            "title": "",
+            "filters": {
+              "customer": "",
+              "backupHealth": "CRITICAL"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "a version 1 template is migrated into blocks, in the old section order",
+      "input": {
+        "version": 1,
+        "title": "Old",
+        "maxRows": 100,
+        "sections": {
+          "tickets": true,
+          "patches": false,
+          "server-health": true,
+          "patch-details": true
+        },
+        "filters": {
+          "from": "2026-09-01",
+          "to": "2026-09-30",
+          "customer": "Acme",
+          "priority": "Critical",
+          "patchType": "windows-security",
+          "agentStatus": "online"
+        }
+      },
+      "expect": {
+        "version": 2,
+        "title": "Old",
+        "annex": false,
+        "maxRows": 100,
+        "period": {
+          "from": "2026-09-01",
+          "to": "2026-09-30"
+        },
+        "weights": {},
+        "blocks": [
+          {
+            "id": "b1",
+            "type": "tickets",
+            "title": "",
+            "filters": {
+              "customer": "Acme",
+              "priority": "Critical",
+              "ticketStatus": "",
+              "ticketType": "",
+              "issueType": "",
+              "subIssueType": ""
+            }
+          },
+          {
+            "id": "b2",
+            "type": "server-health",
+            "title": "",
+            "filters": {
+              "customer": "Acme",
+              "agentStatus": "online"
+            }
+          },
+          {
+            "id": "b3",
+            "type": "patch-details",
+            "title": "",
+            "filters": {
+              "patchType": "windows-security",
+              "patchScope": ""
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "duplicate, invalid and missing block ids are renumbered",
+      "input": {
+        "version": 2,
+        "blocks": [
+          {
+            "id": "x",
+            "type": "tickets"
+          },
+          {
+            "id": "x",
+            "type": "backups"
+          },
+          {
+            "id": "bad id!",
+            "type": "server-health"
+          },
+          {
+            "type": "patches"
+          }
+        ]
+      },
+      "expect": {
+        "version": 2,
+        "title": "IP Capital Management Report",
+        "annex": false,
+        "maxRows": 200,
+        "period": {
+          "from": "",
+          "to": ""
+        },
+        "weights": {},
+        "blocks": [
+          {
+            "id": "x",
+            "type": "tickets",
+            "title": "",
+            "filters": {
+              "customer": "",
+              "priority": "",
+              "ticketStatus": "",
+              "ticketType": "",
+              "issueType": "",
+              "subIssueType": ""
+            }
+          },
+          {
+            "id": "b2",
+            "type": "backups",
+            "title": "",
+            "filters": {
+              "customer": "",
+              "backupHealth": ""
+            }
+          },
+          {
+            "id": "b3",
+            "type": "server-health",
+            "title": "",
+            "filters": {
+              "customer": "",
+              "agentStatus": ""
+            }
+          },
+          {
+            "id": "b4",
+            "type": "patches",
+            "title": "",
+            "filters": {
+              "patchType": "",
+              "patchScope": ""
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "maxRows below the minimum is raised",
+      "input": {
+        "version": 2,
+        "maxRows": 5,
+        "blocks": [
+          {
+            "type": "backups"
+          }
+        ]
+      },
+      "expect_field": {
+        "maxRows": 10
+      }
+    },
+    {
+      "name": "maxRows above the maximum is lowered",
+      "input": {
+        "version": 2,
+        "maxRows": 9999,
+        "blocks": [
+          {
+            "type": "backups"
+          }
+        ]
+      },
+      "expect_field": {
+        "maxRows": 500
+      }
+    },
+    {
+      "name": "a maxRows that is not a whole number falls back to 200",
+      "input": {
+        "version": 2,
+        "maxRows": 12.5,
+        "blocks": [
+          {
+            "type": "backups"
+          }
+        ]
+      },
+      "expect_field": {
+        "maxRows": 200
+      }
+    },
+    {
+      "name": "a blank title falls back to the default",
+      "input": {
+        "version": 2,
+        "title": "   ",
+        "blocks": [
+          {
+            "type": "backups"
+          }
+        ]
+      },
+      "expect_field": {
+        "title": "IP Capital Management Report"
+      }
+    },
+    {
+      "name": "annex must be exactly true",
+      "input": {
+        "version": 2,
+        "annex": "yes",
+        "blocks": [
+          {
+            "type": "backups"
+          }
+        ]
+      },
+      "expect_field": {
+        "annex": false
+      }
+    },
+    {
+      "name": "not an object",
+      "input": "report",
+      "error": true
+    },
+    {
+      "name": "an array",
+      "input": [],
+      "error": true
+    },
+    {
+      "name": "null",
+      "input": null,
+      "error": true
+    },
+    {
+      "name": "no version",
+      "input": {
+        "blocks": [
+          {
+            "type": "tickets"
+          }
+        ]
+      },
+      "error": true
+    },
+    {
+      "name": "an unsupported version",
+      "input": {
+        "version": 3,
+        "blocks": [
+          {
+            "type": "tickets"
+          }
+        ]
+      },
+      "error": true
+    },
+    {
+      "name": "no blocks",
+      "input": {
+        "version": 2
+      },
+      "error": true
+    },
+    {
+      "name": "blocks that is not a list",
+      "input": {
+        "version": 2,
+        "blocks": {}
+      },
+      "error": true
+    },
+    {
+      "name": "an empty list of blocks",
+      "input": {
+        "version": 2,
+        "blocks": []
+      },
+      "error": true
+    },
+    {
+      "name": "a block that is not an object",
+      "input": {
+        "version": 2,
+        "blocks": [
+          "tickets"
+        ]
+      },
+      "error": true
+    },
+    {
+      "name": "an unknown block type",
+      "input": {
+        "version": 2,
+        "blocks": [
+          {
+            "type": "payroll"
+          }
+        ]
+      },
+      "error": true
+    },
+    {
+      "name": "a filter that does not belong to the block type",
+      "input": {
+        "version": 2,
+        "blocks": [
+          {
+            "type": "tickets",
+            "filters": {
+              "agentStatus": "online"
+            }
+          }
+        ]
+      },
+      "error": true
+    },
+    {
+      "name": "a filter that is not text",
+      "input": {
+        "version": 2,
+        "blocks": [
+          {
+            "type": "tickets",
+            "filters": {
+              "customer": 123
+            }
+          }
+        ]
+      },
+      "error": true
+    },
+    {
+      "name": "filters that are a list",
+      "input": {
+        "version": 2,
+        "blocks": [
+          {
+            "type": "tickets",
+            "filters": [
+              "customer"
+            ]
+          }
+        ]
+      },
+      "error": true
+    },
+    {
+      "name": "filters that are text",
+      "input": {
+        "version": 2,
+        "blocks": [
+          {
+            "type": "tickets",
+            "filters": "Acme"
+          }
+        ]
+      },
+      "error": true
+    },
+    {
+      "name": "a block title that is not text",
+      "input": {
+        "version": 2,
+        "blocks": [
+          {
+            "type": "tickets",
+            "title": 5
+          }
+        ]
+      },
+      "error": true
+    },
+    {
+      "name": "a date that is not YYYY-MM-DD",
+      "input": {
+        "version": 2,
+        "period": {
+          "from": "yesterday"
+        },
+        "blocks": [
+          {
+            "type": "tickets"
+          }
+        ]
+      },
+      "error": true
+    },
+    {
+      "name": "a start date after the end date",
+      "input": {
+        "version": 2,
+        "period": {
+          "from": "2026-10-31",
+          "to": "2026-10-01"
+        },
+        "blocks": [
+          {
+            "type": "tickets"
+          }
+        ]
+      },
+      "error": true
+    },
+    {
+      "name": "a period that is not an object",
+      "input": {
+        "version": 2,
+        "period": "october",
+        "blocks": [
+          {
+            "type": "tickets"
+          }
+        ]
+      },
+      "error": true
+    },
+    {
+      "name": "weights that are a list",
+      "input": {
+        "version": 2,
+        "weights": [
+          1
+        ],
+        "blocks": [
+          {
+            "type": "patches"
+          }
+        ]
+      },
+      "error": true
+    },
+    {
+      "name": "a weight key with capitals and a space",
+      "input": {
+        "version": 2,
+        "weights": {
+          "Bad Key": 1
+        },
+        "blocks": [
+          {
+            "type": "patches"
+          }
+        ]
+      },
+      "error": true
+    },
+    {
+      "name": "a negative weight",
+      "input": {
+        "version": 2,
+        "weights": {
+          "third-party": -1
+        },
+        "blocks": [
+          {
+            "type": "patches"
+          }
+        ]
+      },
+      "error": true
+    },
+    {
+      "name": "a weight above 1000",
+      "input": {
+        "version": 2,
+        "weights": {
+          "third-party": 1001
+        },
+        "blocks": [
+          {
+            "type": "patches"
+          }
+        ]
+      },
+      "error": true
+    },
+    {
+      "name": "a weight that is text",
+      "input": {
+        "version": 2,
+        "weights": {
+          "third-party": "2"
+        },
+        "blocks": [
+          {
+            "type": "patches"
+          }
+        ]
+      },
+      "error": true
+    },
+    {
+      "name": "a weight that is true",
+      "input": {
+        "version": 2,
+        "weights": {
+          "third-party": true
+        },
+        "blocks": [
+          {
+            "type": "patches"
+          }
+        ]
+      },
+      "error": true
+    },
+    {
+      "name": "a filter can hold several values: cleaned, de-duplicated ignoring case, and collapsed when there is one or none",
+      "input": {
+        "version": 2,
+        "blocks": [
+          {
+            "type": "tickets",
+            "filters": {
+              "customer": [
+                "Acme",
+                "acme",
+                " Zed ",
+                "",
+                "Beta"
+              ],
+              "priority": [
+                "High"
+              ],
+              "ticketStatus": [],
+              "ticketType": "Incident"
+            }
+          }
+        ]
+      },
+      "expect": {
+        "version": 2,
+        "title": "IP Capital Management Report",
+        "annex": false,
+        "maxRows": 200,
+        "period": {
+          "from": "",
+          "to": ""
+        },
+        "weights": {},
+        "blocks": [
+          {
+            "id": "b1",
+            "type": "tickets",
+            "title": "",
+            "filters": {
+              "customer": [
+                "Acme",
+                "Zed",
+                "Beta"
+              ],
+              "priority": "High",
+              "ticketStatus": "",
+              "ticketType": "Incident",
+              "issueType": "",
+              "subIssueType": ""
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "a patch type filter can hold several types, the client scope cannot",
+      "input": {
+        "version": 2,
+        "blocks": [
+          {
+            "type": "patches",
+            "filters": {
+              "patchType": [
+                "windows-security",
+                "third-party"
+              ],
+              "patchScope": "client:3"
+            }
+          }
+        ]
+      },
+      "expect": {
+        "version": 2,
+        "title": "IP Capital Management Report",
+        "annex": false,
+        "maxRows": 200,
+        "period": {
+          "from": "",
+          "to": ""
+        },
+        "weights": {},
+        "blocks": [
+          {
+            "id": "b1",
+            "type": "patches",
+            "title": "",
+            "filters": {
+              "patchType": [
+                "windows-security",
+                "third-party"
+              ],
+              "patchScope": "client:3"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "a list of only blank values is the same as no filter",
+      "input": {
+        "version": 2,
+        "blocks": [
+          {
+            "type": "backups",
+            "filters": {
+              "customer": [
+                "",
+                "   "
+              ]
+            }
+          }
+        ]
+      },
+      "expect_block_filter": {
+        "customer": ""
+      }
+    },
+    {
+      "name": "the client scope as a list",
+      "input": {
+        "version": 2,
+        "blocks": [
+          {
+            "type": "patches",
+            "filters": {
+              "patchScope": [
+                "client:3"
+              ]
+            }
+          }
+        ]
+      },
+      "error": true
+    },
+    {
+      "name": "a list with a value that is not text",
+      "input": {
+        "version": 2,
+        "blocks": [
+          {
+            "type": "tickets",
+            "filters": {
+              "customer": [
+                "Acme",
+                5
+              ]
+            }
+          }
+        ]
+      },
+      "error": true
+    },
+    {
+      "name": "a list inside a list",
+      "input": {
+        "version": 2,
+        "blocks": [
+          {
+            "type": "tickets",
+            "filters": {
+              "customer": [
+                [
+                  "Acme"
+                ]
+              ]
+            }
+          }
+        ]
+      },
+      "error": true
+    },
+    {
+      "name": "a filter that is an object",
+      "input": {
+        "version": 2,
+        "blocks": [
+          {
+            "type": "tickets",
+            "filters": {
+              "customer": {
+                "a": 1
+              }
+            }
+          }
+        ]
+      },
+      "error": true
+    },
+    {
+      "name": "a default period can be a duration, kept only when set",
+      "input": {
+        "version": 2,
+        "period": {
+          "last": {
+            "amount": 3,
+            "unit": "months"
+          }
+        },
+        "blocks": [
+          {
+            "type": "tickets"
+          }
+        ]
+      },
+      "expect": {
+        "version": 2,
+        "title": "IP Capital Management Report",
+        "annex": false,
+        "maxRows": 200,
+        "weights": {},
+        "period": {
+          "from": "",
+          "to": "",
+          "last": {
+            "amount": 3,
+            "unit": "months"
+          }
+        },
+        "blocks": [
+          {
+            "id": "b1",
+            "type": "tickets",
+            "title": "",
+            "filters": {
+              "customer": "",
+              "priority": "",
+              "ticketStatus": "",
+              "ticketType": "",
+              "issueType": "",
+              "subIssueType": ""
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "a duration of null is no duration",
+      "input": {
+        "version": 2,
+        "period": {
+          "from": "",
+          "to": "",
+          "last": null
+        },
+        "blocks": [
+          {
+            "type": "tickets"
+          }
+        ]
+      },
+      "expect_field": {
+        "period": {
+          "from": "",
+          "to": ""
+        }
+      }
+    },
+    {
+      "name": "weeks are a unit too",
+      "input": {
+        "version": 2,
+        "period": {
+          "last": {
+            "amount": 520,
+            "unit": "weeks"
+          }
+        },
+        "blocks": [
+          {
+            "type": "tickets"
+          }
+        ]
+      },
+      "expect_field": {
+        "period": {
+          "from": "",
+          "to": "",
+          "last": {
+            "amount": 520,
+            "unit": "weeks"
+          }
+        }
+      }
+    },
+    {
+      "name": "a duration together with dates",
+      "input": {
+        "version": 2,
+        "period": {
+          "from": "2026-10-01",
+          "last": {
+            "amount": 3,
+            "unit": "months"
+          }
+        },
+        "blocks": [
+          {
+            "type": "tickets"
+          }
+        ]
+      },
+      "error": true
+    },
+    {
+      "name": "a duration in years",
+      "input": {
+        "version": 2,
+        "period": {
+          "last": {
+            "amount": 1,
+            "unit": "years"
+          }
+        },
+        "blocks": [
+          {
+            "type": "tickets"
+          }
+        ]
+      },
+      "error": true
+    },
+    {
+      "name": "a duration of zero",
+      "input": {
+        "version": 2,
+        "period": {
+          "last": {
+            "amount": 0,
+            "unit": "days"
+          }
+        },
+        "blocks": [
+          {
+            "type": "tickets"
+          }
+        ]
+      },
+      "error": true
+    },
+    {
+      "name": "a duration longer than the unit allows",
+      "input": {
+        "version": 2,
+        "period": {
+          "last": {
+            "amount": 121,
+            "unit": "months"
+          }
+        },
+        "blocks": [
+          {
+            "type": "tickets"
+          }
+        ]
+      },
+      "error": true
+    },
+    {
+      "name": "a duration that is not a whole number",
+      "input": {
+        "version": 2,
+        "period": {
+          "last": {
+            "amount": 1.5,
+            "unit": "days"
+          }
+        },
+        "blocks": [
+          {
+            "type": "tickets"
+          }
+        ]
+      },
+      "error": true
+    },
+    {
+      "name": "a duration amount that is text",
+      "input": {
+        "version": 2,
+        "period": {
+          "last": {
+            "amount": "3",
+            "unit": "days"
+          }
+        },
+        "blocks": [
+          {
+            "type": "tickets"
+          }
+        ]
+      },
+      "error": true
+    },
+    {
+      "name": "a duration amount that is true",
+      "input": {
+        "version": 2,
+        "period": {
+          "last": {
+            "amount": true,
+            "unit": "days"
+          }
+        },
+        "blocks": [
+          {
+            "type": "tickets"
+          }
+        ]
+      },
+      "error": true
+    },
+    {
+      "name": "a duration with an extra field",
+      "input": {
+        "version": 2,
+        "period": {
+          "last": {
+            "amount": 3,
+            "unit": "days",
+            "extra": 1
+          }
+        },
+        "blocks": [
+          {
+            "type": "tickets"
+          }
+        ]
+      },
+      "error": true
+    },
+    {
+      "name": "a duration that is not an object",
+      "input": {
+        "version": 2,
+        "period": {
+          "last": 30
+        },
+        "blocks": [
+          {
+            "type": "tickets"
+          }
+        ]
+      },
+      "error": true
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+# Never commit credentials
+.env
+
+# Reports output (customer data - exclude from repo)
+Reports/
+
+# PowerShell temp
+*.tmp
+
+__pycache__/
+*.pyc

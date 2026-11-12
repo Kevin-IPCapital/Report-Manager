@@ -1,0 +1,79 @@
+erDiagram
+  customers {
+    bigint id PK
+  }
+  snapshot {
+    bigint snapshot_id PK
+  }
+  customer_month {
+    bigint snapshot_id PK, FK
+    text customer_name PK
+  }
+  threat {
+    bigint snapshot_id PK, FK
+    text threat_id PK
+    text customer_name FK
+  }
+  agent {
+    bigint snapshot_id PK, FK
+    text agent_id PK
+    text customer_name FK
+  }
+  threat_class {
+    bigint snapshot_id PK, FK
+    text customer_name PK, FK
+    text classification PK
+  }
+  mitre_tactic {
+    bigint snapshot_id PK, FK
+    text customer_name PK, FK
+    text tactic PK
+  }
+  top_threat {
+    bigint snapshot_id PK, FK
+    text customer_name PK, FK
+    text threat_name PK
+  }
+  top_device {
+    bigint snapshot_id PK, FK
+    text customer_name PK, FK
+    text device_name PK
+  }
+  top_user {
+    bigint snapshot_id PK, FK
+    text customer_name PK, FK
+    text process_user PK
+  }
+  lolbin {
+    bigint snapshot_id PK, FK
+    text customer_name PK, FK
+    text threat_name PK
+  }
+  daily_trend {
+    bigint snapshot_id PK, FK
+    text customer_name PK, FK
+    date trend_date PK
+  }
+  os_spread {
+    bigint snapshot_id PK, FK
+    text customer_name PK, FK
+    text os_name PK
+  }
+  agent_version {
+    bigint snapshot_id PK, FK
+    text customer_name PK, FK
+    text agent_version PK
+  }
+  snapshot ||--o{ customer_month : "snapshot_id"
+  customer_month ||--o{ threat : "snapshot_id, customer_name"
+  customer_month ||--o{ agent : "snapshot_id, customer_name"
+  customer_month ||--o{ threat_class : "snapshot_id, customer_name"
+  customer_month ||--o{ mitre_tactic : "snapshot_id, customer_name"
+  customer_month ||--o{ top_threat : "snapshot_id, customer_name"
+  customer_month ||--o{ top_device : "snapshot_id, customer_name"
+  customer_month ||--o{ top_user : "snapshot_id, customer_name"
+  customer_month ||--o{ lolbin : "snapshot_id, customer_name"
+  customer_month ||--o{ daily_trend : "snapshot_id, customer_name"
+  customer_month ||--o{ os_spread : "snapshot_id, customer_name"
+  customer_month ||--o{ agent_version : "snapshot_id, customer_name"
+  customers |o..o{ agent : "site_id: by site ID, not enforced"

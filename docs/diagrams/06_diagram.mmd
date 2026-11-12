@@ -1,0 +1,13 @@
+flowchart TD
+  L[POST /api/auth/login] --> H{X-Requested-With header?}
+  H -- No --> R[403]
+  H -- Yes --> T{Too many recent failures?}
+  T -- Yes --> R2[429]
+  T -- No --> B{Dev bypass enabled and DEBUG on?}
+  B -- Yes --> D[Create or reuse user, password not checked]
+  B -- No --> A[Django authenticate]
+  A --> P{Valid?}
+  P -- No --> U[401, count the failure]
+  P -- Yes --> K[Clear failures]
+  D --> K
+  K --> TK[Access token in the body, rotating refresh cookie]

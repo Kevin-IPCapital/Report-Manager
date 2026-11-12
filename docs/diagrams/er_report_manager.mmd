@@ -1,0 +1,64 @@
+erDiagram
+  api_refreshtoken {
+    bigint id PK
+    integer user_id FK
+  }
+  api_client {
+    bigint id PK
+    bigint company_id FK
+  }
+  api_clientsourcemap {
+    bigint id PK
+    bigint client_id FK
+  }
+  api_clientalias {
+    bigint id PK
+    bigint client_id FK
+  }
+  api_scoreweight {
+    bigint id PK
+    integer user_id FK
+  }
+  api_patchsnapshot {
+    bigint id PK
+    bigint client_id FK
+  }
+  api_report {
+    bigint id PK
+    integer owner_id FK
+  }
+  api_clientgap {
+    bigint id PK
+    bigint client_id FK
+  }
+  api_clientaccess {
+    bigint id PK
+    integer user_id FK
+    bigint client_id FK
+  }
+  api_company {
+    bigint id PK
+  }
+  api_companymember {
+    bigint id PK
+    bigint company_id FK
+  }
+  api_clientgroup {
+    bigint id PK
+    bigint company_id FK
+  }
+  auth_user {
+    integer id PK
+  }
+  auth_user ||--o{ api_refreshtoken : "user_id"
+  api_company |o--o{ api_client : "company_id"
+  api_client ||--o{ api_clientsourcemap : "client_id"
+  api_client ||--o{ api_clientalias : "client_id"
+  auth_user |o--o{ api_scoreweight : "user_id"
+  api_client |o--o{ api_patchsnapshot : "client_id"
+  auth_user ||--o{ api_report : "owner_id"
+  api_client |o--o{ api_clientgap : "client_id"
+  auth_user ||--o{ api_clientaccess : "user_id"
+  api_client ||--o{ api_clientaccess : "client_id"
+  api_company ||--o{ api_companymember : "company_id"
+  api_company ||--o{ api_clientgroup : "company_id"

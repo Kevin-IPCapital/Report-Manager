@@ -1,0 +1,5 @@
+- **Original application archive** (`ops-dashboard.zip`, supplied) and its collector projects (Autotask, N-central, SentinelOne). Source ERD exports and `Schema Export` described the database.
+- **Cove collector** (`Cove-main.zip`, supplied): added under `Collector/Cove-main`, with three small fixes (see [`05_OPERATIONS.md`](05_OPERATIONS.md)). Not yet run live.
+- **This archive series** (`ops-dashboard-4` onward) added the Django API, the Preact dashboard, authentication, client master list, scoring and snapshots, scheduler and alerts, and this documentation.
+- **Earlier handover documentation** (`IP_Capital_Complete_Technical_Documentation.zip`, supplied) is the basis for this pack, which updates it to the current code.
+- **Operational evidence** in [`06_STATUS_AND_BACKLOG.md`](06_STATUS_AND_BACKLOG.md) (collector successes and failures, row counts) is from output and logs supplied in conversation, not from access to a live system.

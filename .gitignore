@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+db.sqlite3
+node_modules/
+dist/
+.env
+
+# Runtime state and logs (never commit)
+*.log
+*.lock
+backend/logs/
+backend/collector_runtime.sqlite3
+backend/schema.sql
+Collector/**/logs/
+
+# Your own job settings: never shipped or committed (copy backend/collector_jobs.example.json to create it)
+backend/collector_jobs.json

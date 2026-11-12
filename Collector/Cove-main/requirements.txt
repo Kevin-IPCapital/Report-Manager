@@ -1,0 +1,4 @@
+requests
+python-dotenv
+psycopg2-binary
+# pandas   # optional — only needed for DataTable.to_dataframe()

@@ -1,0 +1,64 @@
+erDiagram
+  customers {
+    bigint org_unit_id PK
+  }
+  sites {
+    bigint site_id PK
+  }
+  device {
+    bigint device_id PK
+  }
+  poll_run {
+    bigint poll_id PK
+  }
+  device_poll {
+    bigint poll_id PK, FK
+    bigint device_id PK, FK
+  }
+  perf_check {
+    bigint device_id PK, FK
+    bigint task_id PK
+  }
+  perf_event {
+    bigint event_id PK
+    bigint device_id FK
+    bigint task_id FK
+    bigint first_seen_poll FK
+  }
+  metric_run {
+    bigint run_id PK
+  }
+  perf_sample {
+    bigint device_id PK
+    timestamp sampled_at PK
+    bigint run_id FK
+  }
+  patch_run {
+    bigint run_id PK
+  }
+  device_patch {
+    bigint run_id PK, FK
+    bigint device_id PK
+  }
+  patch_entry {
+    bigint run_id PK, FK
+    bigint device_id PK
+    text title PK
+  }
+  patch_backlog {
+    bigint device_id PK
+    text title PK
+  }
+  poll_run ||--o{ device_poll : "poll_id"
+  device ||--o{ device_poll : "device_id"
+  device ||--o{ perf_check : "device_id"
+  poll_run |o--o{ perf_event : "first_seen_poll"
+  perf_check ||--o{ perf_event : "device_id, task_id"
+  metric_run |o--o{ perf_sample : "run_id"
+  patch_run ||--o{ device_patch : "run_id"
+  patch_run ||--o{ patch_entry : "run_id"
+  customers |o..o{ device : "org_unit_id: the device's customer"
+  sites |o..o{ device : "site_id: the device's site (null for devices attached to the customer)"
+  device |o..o{ device_patch : "device_id: not a declared FK"
+  device_patch |o..o{ patch_entry : "run_id, device_id: not a declared FK"
+  customers |o..o{ patch_run : "org_unit_id: a run covers one customer"

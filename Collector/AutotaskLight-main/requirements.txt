@@ -1,0 +1,3 @@
+psycopg2-binary
+# pandas   # optional — only needed for DataTable.to_dataframe()
+# autotask_client.py and autotask_dataset.py need nothing beyond the standard library.

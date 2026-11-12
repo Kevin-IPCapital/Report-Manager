@@ -1,0 +1,9 @@
+flowchart LR
+  R[N-central patch collection succeeds or is partial] --> W[Worker saves snapshots]
+  W --> A[All devices, as of that run]
+  W --> B[Each client linked to N-central]
+  A --> S[("api_patchsnapshot: counts, shared weights, scores")]
+  B --> S
+  S --> T[GET patch-trend: one point per day]
+  U[GET patches] --> V[Scores with the caller's weights]
+  S -. never changed by user weights .-> V

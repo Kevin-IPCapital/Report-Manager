@@ -1,0 +1,13 @@
+flowchart TD
+  S[Read customer lists: Autotask, N-central, SentinelOne, Cove] --> U[Drop customers already linked by ID]
+  U --> G[Group by identical words in identical order]
+  G --> M{Matches an existing client name or alias?}
+  M -- Yes --> X[Offer to add to that client, flag as inference]
+  M -- No --> Y{More than one customer?}
+  Y -- Yes --> I[Offer a new client, flag as inference]
+  Y -- No --> O[Offer a new client, nothing inferred]
+  X --> C[Person confirms]
+  I --> C
+  O --> C
+  C --> L[Create or extend client, link each customer by its own ID, other spellings kept as aliases]
+  L --> D[Discrepancies: client missing from a source, or link to a customer that no longer exists]

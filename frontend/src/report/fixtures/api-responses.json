@@ -1,0 +1,849 @@
+{
+ "comment": "Generated from the real backend code (api/data/*) with the test database fixtures: the shapes the report code must read. Regenerate with docs/tools/generate_fixtures.py.",
+ "tickets": {
+  "tickets": {
+   "title": "Tickets",
+   "columns": [
+    {
+     "key": "ticket_number",
+     "label": "Ticket"
+    },
+    {
+     "key": "company_name",
+     "label": "Client"
+    },
+    {
+     "key": "title",
+     "label": "Title",
+     "wrap": true
+    },
+    {
+     "key": "ticket_type",
+     "label": "Type"
+    },
+    {
+     "key": "priority",
+     "label": "Priority",
+     "type": "priority"
+    },
+    {
+     "key": "status",
+     "label": "Status",
+     "type": "text"
+    },
+    {
+     "key": "issue_type",
+     "label": "Issue Type"
+    },
+    {
+     "key": "sub_issue_type",
+     "label": "Sub Type"
+    },
+    {
+     "key": "technician",
+     "label": "Technician"
+    },
+    {
+     "key": "response_hours",
+     "label": "Response Time",
+     "type": "duration"
+    },
+    {
+     "key": "resolution_hours",
+     "label": "Resolution Time",
+     "type": "duration"
+    },
+    {
+     "key": "sla_met",
+     "label": "SLA Met",
+     "type": "bool"
+    },
+    {
+     "key": "first_response_met",
+     "label": "Response Met",
+     "type": "bool"
+    }
+   ],
+   "rows": [
+    {
+     "snapshot_id": 7,
+     "ticket_id": 1,
+     "ticket_number": "T1",
+     "company_id": 101,
+     "company_name": "Acme",
+     "title": "VPN down",
+     "description": "d",
+     "resolution": null,
+     "ticket_type": "Incident",
+     "priority": "High",
+     "issue_type": "Network",
+     "sub_issue_type": "VPN",
+     "status": "In Progress",
+     "sla_met": null,
+     "first_response_met": null,
+     "first_response_at": "2026-10-05T10:30:00Z",
+     "first_response_due_at": "2026-10-05T10:00:00Z",
+     "created_at": "2026-10-05T08:00:00Z",
+     "completed_at": null,
+     "response_hours": 2.5,
+     "resolution_hours": null,
+     "rowTone": "high",
+     "rowStatus": "bad",
+     "reason": "First response 30m after the due time",
+     "technician_id": null,
+     "technician": "Unassigned",
+     "client_id": 1
+    },
+    {
+     "snapshot_id": 7,
+     "ticket_id": 2,
+     "ticket_number": "T2",
+     "company_id": 101,
+     "company_name": "Acme",
+     "title": "VPN down",
+     "description": "d",
+     "resolution": null,
+     "ticket_type": "Incident",
+     "priority": "Critical",
+     "issue_type": "Network",
+     "sub_issue_type": "VPN",
+     "status": "Complete",
+     "sla_met": true,
+     "first_response_met": true,
+     "first_response_at": "2026-10-06T08:20:00Z",
+     "first_response_due_at": "2026-10-06T09:00:00Z",
+     "created_at": "2026-10-06T08:00:00Z",
+     "completed_at": "2026-10-06T12:00:00Z",
+     "response_hours": 0.3333,
+     "resolution_hours": 4.0,
+     "rowTone": "critical",
+     "rowStatus": null,
+     "reason": "",
+     "technician_id": null,
+     "technician": "Unassigned",
+     "client_id": 1
+    },
+    {
+     "snapshot_id": 7,
+     "ticket_id": 3,
+     "ticket_number": "T3",
+     "company_id": 101,
+     "company_name": "Unspecified",
+     "title": "VPN down",
+     "description": "d",
+     "resolution": null,
+     "ticket_type": "Incident",
+     "priority": "Unspecified",
+     "issue_type": "Network",
+     "sub_issue_type": "VPN",
+     "status": "In Progress",
+     "sla_met": null,
+     "first_response_met": null,
+     "first_response_at": null,
+     "first_response_due_at": null,
+     "created_at": "2026-10-07T09:00:00Z",
+     "completed_at": null,
+     "response_hours": null,
+     "resolution_hours": null,
+     "rowTone": "unspecified",
+     "rowStatus": null,
+     "reason": "",
+     "technician_id": null,
+     "technician": "Unassigned",
+     "client_id": 1
+    }
+   ]
+  },
+  "technician_available": true
+ },
+ "patches": {
+  "types": [
+   {
+    "key": "windows-security",
+    "label": "Windows Security Patching",
+    "categories": [
+     {
+      "category_id": "g1",
+      "category": "Security Updates",
+      "installed": 8,
+      "missing": 2,
+      "total": 10,
+      "compliance": 80.0,
+      "previous": 60.0
+     }
+    ]
+   },
+   {
+    "key": "windows-patching",
+    "label": "Windows Patching",
+    "categories": []
+   },
+   {
+    "key": "third-party",
+    "label": "Third Party Patching",
+    "categories": [
+     {
+      "category_id": null,
+      "category": "Uncategorised",
+      "installed": 3,
+      "missing": 1,
+      "total": 4,
+      "compliance": 75.0,
+      "previous": null
+     }
+    ]
+   }
+  ],
+  "rows": [
+   {
+    "group": true,
+    "label": "Security Monitoring"
+   },
+   {
+    "key": "windows-security",
+    "label": "Windows Security Patching",
+    "indent": true,
+    "current": 80.0,
+    "previous": 60.0
+   },
+   {
+    "key": "windows-patching",
+    "label": "Windows Patching",
+    "indent": true,
+    "current": null,
+    "previous": null
+   },
+   {
+    "key": "third-party",
+    "label": "Third Party Patching",
+    "indent": true,
+    "current": 75.0,
+    "previous": null
+   }
+  ],
+  "overall": {
+   "current": 77.5,
+   "previous": 60.0
+  },
+  "calculation": {
+   "types": [
+    {
+     "key": "windows-security",
+     "label": "Windows Security Patching",
+     "categories": [
+      {
+       "category_id": "g1",
+       "category": "Security Updates",
+       "compliance": 80.0,
+       "weight": 1,
+       "counts": true,
+       "reason": null,
+       "share": 100.0
+      }
+     ],
+     "weighted_total": 80.0,
+     "weight_total": 1.0,
+     "score": 80.0,
+     "weight": 1,
+     "counts": true,
+     "reason": null,
+     "share": 50.0
+    },
+    {
+     "key": "windows-patching",
+     "label": "Windows Patching",
+     "categories": [],
+     "weighted_total": 0.0,
+     "weight_total": 0.0,
+     "score": null,
+     "weight": 1,
+     "counts": false,
+     "reason": "none of its categories counts",
+     "share": null
+    },
+    {
+     "key": "third-party",
+     "label": "Third Party Patching",
+     "categories": [
+      {
+       "category_id": null,
+       "category": "Uncategorised",
+       "compliance": 75.0,
+       "weight": 1,
+       "counts": true,
+       "reason": null,
+       "share": 100.0
+      }
+     ],
+     "weighted_total": 75.0,
+     "weight_total": 1.0,
+     "score": 75.0,
+     "weight": 1,
+     "counts": true,
+     "reason": null,
+     "share": 50.0
+    }
+   ],
+   "overall": {
+    "score": 77.5,
+    "weighted_total": 155.0,
+    "weight_total": 2.0
+   }
+  },
+  "client": null,
+  "org": null,
+  "mapped": true,
+  "clients": [
+   {
+    "key": "client:1",
+    "label": "Acme",
+    "client": 1,
+    "org": null,
+    "linked": true,
+    "devices": 8
+   },
+   {
+    "key": "org:30",
+    "label": "Blue Crane",
+    "client": null,
+    "org": 30,
+    "linked": false,
+    "devices": 4
+   }
+  ],
+  "columns": [
+   {
+    "key": "category",
+    "label": "Category",
+    "type": "link"
+   },
+   {
+    "key": "installed",
+    "label": "Installed"
+   },
+   {
+    "key": "missing",
+    "label": "Missing"
+   },
+   {
+    "key": "total",
+    "label": "Total"
+   },
+   {
+    "key": "compliance",
+    "label": "Compliance",
+    "type": "percent"
+   }
+  ]
+ },
+ "patch-entries": {
+  "entries": {
+   "title": "Patches",
+   "columns": [
+    {
+     "key": "device",
+     "label": "Device"
+    },
+    {
+     "key": "title",
+     "label": "Title",
+     "wrap": true
+    },
+    {
+     "key": "kb",
+     "label": "KB"
+    },
+    {
+     "key": "installed",
+     "label": "Installed",
+     "type": "bool"
+    }
+   ],
+   "rows": [
+    {
+     "run_id": 5,
+     "category": "Security Updates",
+     "category_id": "g1",
+     "result": "Installed",
+     "is_security": true,
+     "is_third_party": false,
+     "kb": "KB5000001",
+     "device_id": 11,
+     "device_name": "SRV-11",
+     "title": "Cumulative update",
+     "is_missing": true,
+     "installed_at": null,
+     "device": "SRV-11",
+     "installed": false
+    },
+    {
+     "run_id": 5,
+     "category": "Security Updates",
+     "category_id": "g1",
+     "result": "Installed",
+     "is_security": true,
+     "is_third_party": false,
+     "kb": "KB5000001",
+     "device_id": 12,
+     "device_name": null,
+     "title": "Servicing stack",
+     "is_missing": false,
+     "installed_at": "2026-10-03T08:00:00Z",
+     "device": "12",
+     "installed": true
+    },
+    {
+     "run_id": 5,
+     "category": "Security Updates",
+     "category_id": "g1",
+     "result": null,
+     "is_security": true,
+     "is_third_party": false,
+     "kb": "KB5000001",
+     "device_id": 13,
+     "device_name": "SRV-13",
+     "title": "Unknown state",
+     "is_missing": null,
+     "installed_at": null,
+     "device": "SRV-13",
+     "installed": null
+    }
+   ]
+  }
+ },
+ "server-health": {
+  "servers": [
+   {
+    "agent_id": "a1",
+    "customer_name": "Acme",
+    "computer_name": "SRV-A",
+    "network_status": "connected",
+    "last_collected_at": "2026-11-12T10:32:04.830941Z",
+    "data_age_hours": 1.0,
+    "machine_type": "server",
+    "os_type": "windows",
+    "agent_version": "23.4",
+    "mitigation_mode": "protect",
+    "is_up_to_date": true,
+    "infected": false,
+    "is_active": false,
+    "client_id": 1,
+    "patches": {
+     "status": "matched",
+     "device_name": "srv-a.acme.local",
+     "categories": [
+      {
+       "key": "windows-security",
+       "label": "Windows Security Patching",
+       "last_installed_at": "2026-11-09T11:32:04.830978Z",
+       "days_since_last": 3.0,
+       "next_due": null,
+       "up_to_date": false,
+       "missing": 2,
+       "oldest_missing_days": 20.0,
+       "overdue": true
+      },
+      {
+       "key": "windows-patching",
+       "label": "Windows Patching",
+       "last_installed_at": "2026-11-02T11:32:04.830980Z",
+       "days_since_last": 10.0,
+       "next_due": null,
+       "up_to_date": true,
+       "missing": 0,
+       "oldest_missing_days": null,
+       "overdue": false
+      },
+      {
+       "key": "third-party",
+       "label": "Third Party Patching",
+       "last_installed_at": null,
+       "days_since_last": null,
+       "next_due": null,
+       "up_to_date": false,
+       "missing": 1,
+       "oldest_missing_days": 5.0,
+       "overdue": false
+      }
+     ],
+     "collection": {
+      "state": "ok",
+      "attempted_at": "2026-11-11T23:32:04.830991Z",
+      "days_ago": 0.5
+     },
+     "seen": {
+      "at": "2026-11-11T11:32:04.830970Z",
+      "days_ago": 1.0
+     },
+     "inventory": {
+      "at": "2026-11-11T23:32:04.830998Z",
+      "days_ago": 0.5
+     }
+    },
+    "collected": [
+     {
+      "key": "sentinelone",
+      "label": "SentinelOne",
+      "what": "Security agent",
+      "state": "found",
+      "at": "2026-11-12T10:32:04.830941Z",
+      "days_ago": 0.0
+     },
+     {
+      "key": "ncentral-device",
+      "label": "N-central",
+      "what": "Device inventory",
+      "state": "found",
+      "at": "2026-11-11T11:32:04.830970Z",
+      "days_ago": 1.0
+     },
+     {
+      "key": "ncentral-patches",
+      "label": "N-central",
+      "what": "Patch inventory",
+      "state": "found",
+      "at": "2026-11-11T23:32:04.830998Z",
+      "days_ago": 0.5
+     },
+     {
+      "key": "cove",
+      "label": "Cove",
+      "what": "Backup",
+      "state": "no-match",
+      "at": null,
+      "days_ago": null
+     }
+    ]
+   },
+   {
+    "agent_id": "a2",
+    "customer_name": "Acme",
+    "computer_name": "SRV-B",
+    "network_status": "connected",
+    "last_collected_at": "2026-11-12T09:32:04.830941Z",
+    "data_age_hours": 2.0,
+    "machine_type": "server",
+    "os_type": "windows",
+    "agent_version": "23.4",
+    "mitigation_mode": "protect",
+    "is_up_to_date": true,
+    "infected": false,
+    "is_active": true,
+    "client_id": 1,
+    "patches": {
+     "status": "matched",
+     "device_name": "SRV-B",
+     "categories": [
+      {
+       "key": "windows-security",
+       "label": "Windows Security Patching",
+       "last_installed_at": "2026-10-03T11:32:04.830982Z",
+       "days_since_last": 40.0,
+       "next_due": null,
+       "up_to_date": true,
+       "missing": 0,
+       "oldest_missing_days": null,
+       "overdue": false
+      },
+      {
+       "key": "windows-patching",
+       "label": "Windows Patching",
+       "last_installed_at": null,
+       "days_since_last": null,
+       "next_due": null,
+       "up_to_date": false,
+       "missing": 1,
+       "oldest_missing_days": 30.0,
+       "overdue": true
+      },
+      {
+       "key": "third-party",
+       "label": "Third Party Patching",
+       "last_installed_at": null,
+       "days_since_last": null,
+       "next_due": null,
+       "up_to_date": null,
+       "missing": 0,
+       "oldest_missing_days": null,
+       "overdue": false
+      }
+     ],
+     "collection": {
+      "state": "disconnected",
+      "attempted_at": "2026-11-11T23:32:04.830997Z",
+      "days_ago": 0.5
+     },
+     "seen": {
+      "at": "2026-11-10T11:32:04.830975Z",
+      "days_ago": 2.0
+     },
+     "inventory": {
+      "at": "2026-11-09T11:32:04.831000Z",
+      "days_ago": 3.0
+     }
+    },
+    "collected": [
+     {
+      "key": "sentinelone",
+      "label": "SentinelOne",
+      "what": "Security agent",
+      "state": "found",
+      "at": "2026-11-12T09:32:04.830941Z",
+      "days_ago": 0.1
+     },
+     {
+      "key": "ncentral-device",
+      "label": "N-central",
+      "what": "Device inventory",
+      "state": "found",
+      "at": "2026-11-10T11:32:04.830975Z",
+      "days_ago": 2.0
+     },
+     {
+      "key": "ncentral-patches",
+      "label": "N-central",
+      "what": "Patch inventory",
+      "state": "found",
+      "at": "2026-11-09T11:32:04.831000Z",
+      "days_ago": 3.0
+     },
+     {
+      "key": "cove",
+      "label": "Cove",
+      "what": "Backup",
+      "state": "no-match",
+      "at": null,
+      "days_ago": null
+     }
+    ]
+   },
+   {
+    "agent_id": "a3",
+    "customer_name": "Zed",
+    "computer_name": "PC-1",
+    "network_status": "connected",
+    "last_collected_at": "2026-11-12T11:27:04.830941Z",
+    "data_age_hours": 0.0833,
+    "machine_type": "server",
+    "os_type": "windows",
+    "agent_version": "23.4",
+    "mitigation_mode": "protect",
+    "is_up_to_date": true,
+    "infected": true,
+    "is_active": true,
+    "client_id": 2,
+    "patches": {
+     "status": "no-match"
+    },
+    "collected": [
+     {
+      "key": "sentinelone",
+      "label": "SentinelOne",
+      "what": "Security agent",
+      "state": "found",
+      "at": "2026-11-12T11:27:04.830941Z",
+      "days_ago": 0.0
+     },
+     {
+      "key": "ncentral-device",
+      "label": "N-central",
+      "what": "Device inventory",
+      "state": "no-match",
+      "at": null,
+      "days_ago": null
+     },
+     {
+      "key": "ncentral-patches",
+      "label": "N-central",
+      "what": "Patch inventory",
+      "state": "no-match",
+      "at": null,
+      "days_ago": null
+     },
+     {
+      "key": "cove",
+      "label": "Cove",
+      "what": "Backup",
+      "state": "no-match",
+      "at": null,
+      "days_ago": null
+     }
+    ]
+   }
+  ],
+  "patch_info": {
+   "available": true,
+   "grace_days": 14,
+   "matched": 2,
+   "disconnected": 1
+  }
+ },
+ "backups": {
+  "available": true,
+  "loaded": true,
+  "title": "Backup devices",
+  "columns": [
+   {
+    "key": "customer",
+    "label": "Customer"
+   },
+   {
+    "key": "device_name",
+    "label": "Device"
+   },
+   {
+    "key": "device_type",
+    "label": "Device Type"
+   },
+   {
+    "key": "health",
+    "label": "Health",
+    "type": "health"
+   },
+   {
+    "key": "red_flag_count",
+    "label": "Red Flags"
+   },
+   {
+    "key": "last_success",
+    "label": "Last Success",
+    "type": "datetime"
+   },
+   {
+    "key": "days_since_success",
+    "label": "Days Since Success"
+   },
+   {
+    "key": "used_storage_bytes",
+    "label": "Used Storage",
+    "type": "bytes"
+   },
+   {
+    "key": "retention_days",
+    "label": "Retention (Days)"
+   },
+   {
+    "key": "cloud_status",
+    "label": "Cloud Storage"
+   },
+   {
+    "key": "lsv_status",
+    "label": "LSV"
+   },
+   {
+    "key": "immutable_enabled",
+    "label": "Immutable",
+    "type": "flag"
+   }
+  ],
+  "rows": [
+   {
+    "snapshot_id": 22,
+    "device_id": 3,
+    "device_name": "m365-mailboxes",
+    "customer": "Unmapped Co",
+    "client_id": null,
+    "hostname": "m365-mailboxes",
+    "os_type": "Server",
+    "account_type": "Endpoint/Server",
+    "device_type": "Microsoft 365",
+    "is_server": false,
+    "is_m365": true,
+    "health": "CRITICAL",
+    "red_flag_count": 2,
+    "flags": [
+     {
+      "category": "backup_currency",
+      "flag": "NO SUCCESSFUL BACKUP IN 12 DAYS"
+     },
+     {
+      "category": "session_failure",
+      "flag": "Exchange: Failed"
+     }
+    ],
+    "last_success": "2026-10-01T03:00:00Z",
+    "days_since_success": 12,
+    "used_storage_bytes": 3221225472,
+    "retention_days": 120,
+    "lsv_enabled": true,
+    "lsv_status": "Healthy",
+    "cloud_status": "Healthy",
+    "immutable_enabled": true,
+    "client_old": false,
+    "os_eol": null,
+    "active_datasources": "Files",
+    "captured_at": "2026-10-10T06:00:00Z",
+    "data_age_hours": 797.5347,
+    "rowStatus": "bad",
+    "reason": "NO SUCCESSFUL BACKUP IN 12 DAYS; Exchange: Failed"
+   },
+   {
+    "snapshot_id": 21,
+    "device_id": 2,
+    "device_name": "PC-RECEPTION",
+    "customer": "Zed",
+    "client_id": 2,
+    "hostname": "srv-file",
+    "os_type": "Workstation",
+    "account_type": "Endpoint/Server",
+    "device_type": "Workstation",
+    "is_server": false,
+    "is_m365": false,
+    "health": "WARNING",
+    "red_flag_count": 1,
+    "flags": [
+     {
+      "category": "retention",
+      "flag": "RETENTION SHORT: 45 days (recommended: 90+)"
+     }
+    ],
+    "last_success": "2026-10-09T03:00:00Z",
+    "days_since_success": 1,
+    "used_storage_bytes": null,
+    "retention_days": 45,
+    "lsv_enabled": true,
+    "lsv_status": "Healthy",
+    "cloud_status": "Healthy",
+    "immutable_enabled": null,
+    "client_old": false,
+    "os_eol": null,
+    "active_datasources": "Files",
+    "captured_at": "2026-10-10T06:00:00Z",
+    "data_age_hours": 797.5347,
+    "rowStatus": "warn",
+    "reason": "RETENTION SHORT: 45 days (recommended: 90+)"
+   },
+   {
+    "snapshot_id": 20,
+    "device_id": 1,
+    "device_name": "SRV-FILE",
+    "customer": "Acme",
+    "client_id": 1,
+    "hostname": "srv-file",
+    "os_type": "Server",
+    "account_type": "Endpoint/Server",
+    "device_type": "Server",
+    "is_server": true,
+    "is_m365": false,
+    "health": "OK",
+    "red_flag_count": 0,
+    "flags": [],
+    "last_success": "2026-10-09T03:00:00Z",
+    "days_since_success": 1,
+    "used_storage_bytes": 3221225472,
+    "retention_days": 120,
+    "lsv_enabled": true,
+    "lsv_status": "Healthy",
+    "cloud_status": "Healthy",
+    "immutable_enabled": true,
+    "client_old": false,
+    "os_eol": null,
+    "active_datasources": "Files",
+    "captured_at": "2026-10-10T06:00:00Z",
+    "data_age_hours": 797.5347,
+    "rowStatus": null,
+    "reason": ""
+   }
+  ]
+ }
+}

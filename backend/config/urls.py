@@ -1,0 +1,36 @@
+from django.urls import path
+
+from api import views, collection_health, collection_actions
+
+urlpatterns = [
+    path('api/collectors/execution', collection_actions.collection_execution),
+    path('api/collectors/run', collection_actions.request_collection),
+    path('api/freshness', collection_health.data_freshness),
+    path('api/collectors/health', collection_health.collection_health),
+    path('api/collectors/<str:job>/latest-log', collection_health.collection_latest_log),
+    path('api/auth/login', views.login),
+    path('api/auth/refresh', views.refresh),
+    path('api/auth/logout', views.logout),
+    path('api/auth/register', views.register),
+    path('api/auth/forgot', views.forgot_password),
+    path('api/auth/reset', views.reset_password),
+    path('api/sections/<str:name>', views.section),
+    path('api/clients', views.clients),
+    path('api/clients/resolution', views.clients_resolution),
+    path('api/clients/resolve', views.clients_resolve),
+    path('api/companies', views.companies),
+    path('api/companies/<int:pk>', views.company_detail),
+    path('api/users/<str:username>/company', views.user_company),
+    path('api/users', views.create_person),
+    path('api/users/<str:username>', views.update_person),
+    path('api/users/<str:username>/link', views.new_setup_link),
+    path('api/client-groups', views.client_groups),
+    path('api/client-groups/<int:pk>', views.client_group_detail),
+    path('api/access', views.access_overview),
+    path('api/access/<str:username>', views.access_for_user),
+    path('api/reports', views.reports),
+    path('api/reports/<int:pk>', views.report_detail),
+    path('api/weights', views.weights),
+    path('api/clients/<int:pk>', views.client_detail),
+    path('api/clients/<int:pk>/claim', views.client_claim),
+]

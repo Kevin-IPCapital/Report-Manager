@@ -1,0 +1,40 @@
+erDiagram
+  api_client ||--o{ api_clientsourcemap : "linked by"
+  api_client ||--o{ api_clientalias : "known as"
+  api_client |o--o{ api_patchsnapshot : "scored in"
+  api_clientsourcemap {
+    varchar source "autotask, ncentral, sentinelone, cove"
+    varchar external_id "the source system's own ID, as text"
+  }
+  autotask_ticket {
+    bigint ticket_id PK
+    bigint company_id
+  }
+  autotask_customers {
+    bigint autotask_company_id
+  }
+  ncentral_device {
+    bigint device_id PK
+    bigint org_unit_id "customer"
+    bigint site_id "site"
+  }
+  ncentral_customers {
+    bigint org_unit_id PK
+  }
+  sentinelone_agent {
+    text agent_id PK
+    text site_id
+  }
+  sentinelone_customers {
+    text site_id
+  }
+  cove_customers {
+    integer id PK
+  }
+  autotask_ticket }o..o| api_clientsourcemap : "company_id = external_id (autotask)"
+  autotask_customers }o..o| api_clientsourcemap : "autotask_company_id = external_id (autotask)"
+  ncentral_device }o..o| api_clientsourcemap : "org_unit_id = external_id (ncentral)"
+  ncentral_customers }o..o| api_clientsourcemap : "org_unit_id = external_id (ncentral)"
+  sentinelone_agent }o..o| api_clientsourcemap : "site_id = external_id (sentinelone)"
+  sentinelone_customers }o..o| api_clientsourcemap : "site_id = external_id (sentinelone)"
+  cove_customers }o..o| api_clientsourcemap : "id = external_id (cove)"

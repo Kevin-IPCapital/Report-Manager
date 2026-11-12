@@ -1,0 +1,49 @@
+flowchart TB
+  subgraph External[Externally managed systems]
+    AT[Autotask PSA API]
+    NC[N-central API]
+    S1[SentinelOne API]
+    CV[Cove API]
+  end
+  subgraph Ingest[Collectors - separate processes]
+    A[Autotask collector]
+    N[N-central inventory / patches / monitoring]
+    S[SentinelOne monthly collector]
+    C[Cove collector]
+  end
+  subgraph DB[PostgreSQL]
+    ATS[(autotask)]
+    NCS[(ncentral)]
+    S1S[(sentinelone)]
+    CVS[(cove)]
+    RM[("report_manager: users, clients, links, weights, snapshots")]
+  end
+  subgraph Ops[Running collection]
+    SCH[run_scheduler or Windows Task Scheduler]
+    W[collection_worker]
+    AL[collection_alerts]
+    Q[("SQLite queue + heartbeat")]
+  end
+  subgraph App[Application]
+    API[Django API]
+    UI[Preact dashboard]
+    PDF[Browser PDF builder]
+  end
+  AT --> A --> ATS
+  NC --> N --> NCS
+  S1 --> S --> S1S
+  CV --> C --> CVS
+  ATS --> API
+  NCS --> API
+  S1S --> API
+  CVS -. later .-> API
+  RM <--> API
+  API <--> UI --> PDF
+  UI -->|queue a run| API --> Q
+  SCH --> W --> Q
+  W --> A
+  W --> N
+  W --> S
+  W --> C
+  W -->|after patch run| RM
+  SCH --> AL --> Q

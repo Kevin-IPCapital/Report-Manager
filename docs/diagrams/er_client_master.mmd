@@ -1,0 +1,14 @@
+erDiagram
+  api_client ||--|| client_master : "one row per client"
+  client_master {
+    bigint client_id PK
+    varchar client_name
+    bigint_array autotask_company_ids
+    bigint_array ncentral_org_unit_ids
+    varchar_array sentinelone_site_ids
+    varchar_array cove_customer_ids
+  }
+  client_master ||..o{ autotask_ticket : "company_id = ANY (autotask_company_ids)"
+  client_master ||..o{ ncentral_device : "org_unit_id = ANY (ncentral_org_unit_ids)"
+  client_master ||..o{ sentinelone_agent : "site_id = ANY (sentinelone_site_ids)"
+  client_master ||..o{ cove_customers : "id = ANY (cove_customer_ids)"

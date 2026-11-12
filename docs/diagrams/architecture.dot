@@ -1,0 +1,15 @@
+digraph G {
+ graph [rankdir=TB, bgcolor="white", nodesep=.35, ranksep=.55, fontname="DejaVu Sans", fontsize=12, pad=.3];
+ node [shape=box, style="rounded,filled", fillcolor="#F1F4FB", color="#2B3D89", fontname="DejaVu Sans", fontsize=10, margin=".14,.1"];
+ edge [color="#697896", penwidth=1.35, arrowsize=.7];
+ {rank=same; at [label="Autotask PSA\nExternal API"]; nc [label="N-central\nExternal API"]; s1 [label="SentinelOne\nExternal API"]; cv [label="Cove\nExternal API"]}
+ {rank=same; ca [label="Autotask collector",fillcolor="#E7F4F0"]; cn [label="N-central collectors",fillcolor="#E7F4F0"]; cs [label="SentinelOne collector",fillcolor="#E7F4F0"]; cc [label="Cove collector",fillcolor="#E7F4F0"]}
+ {rank=same; da [label="Postgres: autotask",shape=cylinder]; dn [label="Postgres: ncentral",shape=cylinder]; ds [label="Postgres: sentinelone",shape=cylinder]; dc [label="Postgres: cove",shape=cylinder]}
+ django [label="Django API: reports, auth, clients, scores, collector control",fillcolor="#E8E9F8"];
+ react [label="Preact dashboard / PDF report builder",fillcolor="#E8E9F8"];
+ queue [label="SQLite queue + heartbeat\nworker tick, alerts",fillcolor="#FFF3E8"];
+ appdb [label="Postgres: report_manager\nusers, clients, links, weights, snapshots",shape=cylinder];
+ at->ca->da->django; nc->cn->dn->django; s1->cs->ds->django; cv->cc->dc->django;
+ django->react [dir=both]; django->appdb [dir=both]; react->queue [style=dashed,label="enqueue via API",fontsize=8];
+ queue->cn [style=dashed]; queue->ca [style=dashed]; queue->cs [style=dashed]; queue->cc [style=dashed];
+}

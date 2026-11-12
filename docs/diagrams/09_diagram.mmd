@@ -1,0 +1,11 @@
+flowchart LR
+  U[Open Report Builder] --> S[Select sections and filters]
+  J[Imported JSON template] --> S
+  S --> A[Fetch ticket, patch and health endpoints]
+  A --> F[Apply filters, compute series]
+  F --> V{Data available?}
+  V -- Yes --> P[KPI cards and charts]
+  V -- No --> N[Unavailable state, nothing invented]
+  P --> PDF[Generate A4 PDF in the browser]
+  S --> E[Export template as JSON]
+  N --> PDF

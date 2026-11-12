@@ -1,0 +1,24 @@
+flowchart TD
+  A[Scheduler tick] --> B{Worker lock free?}
+  B -- No --> Z[Record BUSY heartbeat, exit normally]
+  B -- Yes --> H[Record TICK heartbeat]
+  H --> I[Mark interrupted batches failed]
+  I --> C{Batch queued?}
+  C -- Yes --> F[Claim it]
+  C -- No --> D[Find due scheduled jobs]
+  D --> E{Any due?}
+  E -- No --> X[Record IDLE, exit]
+  E -- Yes --> F
+  F --> G[Run next job as child process, heartbeat every 30 s]
+  G --> O{Outcome}
+  O -- complete --> S1[SUCCESS]
+  O -- devices N-central cannot find --> S2[PARTIAL]
+  O -- fatal or timeout --> S3[FAILED]
+  S1 --> P{N-central patches?}
+  S2 --> P
+  S3 --> L
+  P -- Yes --> SN[Save patch score snapshots]
+  P -- No --> L
+  SN --> L{More jobs?}
+  L -- Yes --> G
+  L -- No --> M[Finish batch, record IDLE]

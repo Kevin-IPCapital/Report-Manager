@@ -1,0 +1,12 @@
+digraph W {
+ graph [rankdir=TB, bgcolor="white", nodesep=.35, ranksep=.4, fontname="DejaVu Sans", pad=.3];
+ node [shape=box, style="rounded,filled", fillcolor="#F1F4FB", color="#2B3D89", fontname="DejaVu Sans", fontsize=10];
+ edge [color="#697896", penwidth=1.3, arrowsize=.7, fontname="DejaVu Sans", fontsize=9];
+ tick [label="Scheduler tick\n(Task Scheduler or run_scheduler)"]; lock [label="Worker lock free?", shape=diamond, fillcolor="#FFF3E8"];
+ busy [label="Record BUSY, exit normally"]; beat [label="Record heartbeat"]; work [label="Queued batch or due jobs?", shape=diamond, fillcolor="#FFF3E8"];
+ none [label="Record IDLE, exit"]; run [label="Run job as child process\nheartbeat every 30 s"]; out [label="Outcome?", shape=diamond, fillcolor="#FFF3E8"];
+ ok [label="SUCCESS", fillcolor="#E7F4F0"]; part [label="PARTIAL", fillcolor="#FFF3E8"]; bad [label="FAILED", fillcolor="#FBE9EA"];
+ snap [label="N-central patches:\nsave score snapshots"]; more [label="More jobs?", shape=diamond, fillcolor="#FFF3E8"]; fin [label="Finish batch, record IDLE"];
+ tick->lock; lock->busy [label="no"]; lock->beat [label="yes"]; beat->work; work->none [label="no"]; work->run [label="yes"];
+ run->out; out->ok; out->part; out->bad; ok->snap; part->snap; snap->more; bad->more; more->run [label="yes"]; more->fin [label="no"];
+}

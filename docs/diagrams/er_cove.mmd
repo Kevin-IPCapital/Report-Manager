@@ -1,0 +1,30 @@
+erDiagram
+  customers {
+    integer id PK
+  }
+  snapshot {
+    bigint snapshot_id PK
+  }
+  device {
+    bigint snapshot_id PK, FK
+    bigint device_id PK
+  }
+  datasource_session {
+    bigint snapshot_id PK, FK
+    bigint device_id PK, FK
+    text ds_code PK
+  }
+  m365_source {
+    bigint snapshot_id PK, FK
+    bigint device_id PK, FK
+    text source_label PK
+  }
+  red_flag {
+    bigint red_flag_id PK
+    bigint snapshot_id FK
+    bigint device_id FK
+  }
+  snapshot ||--o{ device : "snapshot_id"
+  device ||--o{ datasource_session : "snapshot_id, device_id"
+  device ||--o{ m365_source : "snapshot_id, device_id"
+  device ||--o{ red_flag : "snapshot_id, device_id"

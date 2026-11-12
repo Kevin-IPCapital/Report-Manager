@@ -1,0 +1,52 @@
+{
+  "source_directories": {
+    "ncentral": "../Collector/ncentralAPI-main",
+    "autotask": "../Collector/AutotaskLight-main",
+    "sentinelone": "../Collector/SentinelOne-main",
+    "cove": "../Collector/Cove-main"
+  },
+  "jobs": {
+    "ncentral_inventory": {
+      "enabled": true,
+      "schedule_enabled": true,
+      "interval_minutes": 1440,
+      "timeout_seconds": 1200,
+      "args": []
+    },
+    "ncentral_patches": {
+      "enabled": true,
+      "schedule_enabled": true,
+      "interval_minutes": 1440,
+      "timeout_seconds": 1800,
+      "args": []
+    },
+    "ncentral_monitoring": {
+      "enabled": true,
+      "schedule_enabled": true,
+      "interval_minutes": 60,
+      "timeout_seconds": 1800,
+      "args": []
+    },
+    "autotask_tickets": {
+      "enabled": false,
+      "schedule_enabled": false,
+      "interval_minutes": 1440,
+      "timeout_seconds": 3600,
+      "args": []
+    },
+    "sentinelone_monthly": {
+      "enabled": true,
+      "schedule_enabled": false,
+      "interval_minutes": 10080,
+      "timeout_seconds": 3600,
+      "args": []
+    },
+    "cove_backup": {
+      "enabled": false,
+      "schedule_enabled": false,
+      "interval_minutes": 1440,
+      "timeout_seconds": 1800,
+      "args": []
+    }
+  }
+}
