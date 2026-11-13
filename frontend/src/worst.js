@@ -2,7 +2,7 @@
 //   Tickets   late or flagged first (a late first response, or the SLA missed), then the longest open
 //   Servers   infected, then not connected, then the oldest data
 //   Patches   the category with the lowest compliance first
-//   Backups   critical, then warning, then OK; within each, the longest since a successful backup
+//   Backups   critical, then warning, then OK; within each, the longest since a successful backup; then the most red flags
 // Every function returns a new array and leaves the one it was given alone. Ties keep a steady, readable order (names).
 import { connectionOf } from './serverHealth.js';
 
@@ -50,5 +50,6 @@ export const worstCategories = (rows) => [...rows].sort(compareCategories);
 const HEALTH_RANK = { CRITICAL: 0, WARNING: 1, OK: 2 };
 export const compareBackups = (a, b) => (HEALTH_RANK[a.health] ?? 3) - (HEALTH_RANK[b.health] ?? 3)
   || num(b.days_since_success, Infinity) - num(a.days_since_success, Infinity)   // never succeeded is the longest of all
+  || num(b.red_flag_count, 0) - num(a.red_flag_count, 0)                           // a tie breaker (owner, 12 Nov 2026): the more red flags, the worse
   || byText(a.customer, b.customer) || byText(a.device_name, b.device_name);
 export const worstBackups = (rows) => [...rows].sort(compareBackups);

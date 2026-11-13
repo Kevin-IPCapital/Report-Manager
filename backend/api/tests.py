@@ -325,6 +325,18 @@ class ClientApi(StaffClient, CacheClearMixin, TestCase):
         again = self.call('put', f'/api/clients/{client_id}', self.staff, {'name': 'Acme Ltd', 'sources': [{'source': 'cove', 'external_id': '4'}], 'aliases': ['AL']})
         self.assertEqual(again.status_code, 200)
 
+    def test_a_clients_linked_customers_carry_their_names_and_not_only_their_ids(self):
+        self.make('Acme', sources=[{'source': 'autotask', 'external_id': '101'}, {'source': 'ncentral', 'external_id': '7'}, {'source': 'cove', 'external_id': '55'}])
+        found = ({'autotask': [{'external_id': 101, 'customer_name': 'IP Capital: BITCO'}], 'ncentral': [{'external_id': 7, 'customer_name': 'IP Capital (BitCo)'}]}, ['cove'])
+        with patch('api.clients.source_customers', return_value=found):
+            links = self.call('get', '/api/clients', self.staff).json()[0]['sources']
+        self.assertEqual({(s['source'], s['external_id']): s['customer_name'] for s in links},
+                         {('autotask', '101'): 'IP Capital: BITCO', ('ncentral', '7'): 'IP Capital (BitCo)', ('cove', '55'): None})   # Cove could not be read: no name, never a guess
+
+    def test_the_other_client_endpoints_still_answer_without_customer_names(self):
+        made = self.make('Acme', sources=[{'source': 'autotask', 'external_id': '101'}]).json()
+        self.assertEqual(made['sources'], [{'source': 'autotask', 'external_id': '101'}])
+
     def test_only_staff_can_change_clients_but_anyone_signed_in_can_list_them(self):
         client_id = self.make().json()['id']
         self.assertEqual(self.call('post', '/api/clients', self.plain, {'name': 'X'}).status_code, 403)

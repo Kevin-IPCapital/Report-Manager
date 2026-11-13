@@ -227,10 +227,11 @@ def _clients():
     return Client.objects.select_related('company').prefetch_related('sources', 'aliases')
 
 
-def _client_dict(c):
+def _client_dict(c, names=None):
+    """A client as the API gives it. With `names` (client_lib.customer_names), each linked customer also carries its `customer_name` (None when unknown)."""
     return {'id': c.pk, 'name': c.name, 'contact_email': c.contact_email, 'notes': c.notes, 'is_active': c.is_active, 'company': _company_dict(c.company),
-            'sources': sorted(({'source': s.source, 'external_id': s.external_id} for s in c.sources.all()),
-                              key=lambda s: (s['source'], s['external_id'])),
+            'sources': sorted(({'source': s.source, 'external_id': s.external_id, **({'customer_name': names.get((s.source, s.external_id))} if names is not None else {})}
+                               for s in c.sources.all()), key=lambda s: (s['source'], s['external_id'])),
             'aliases': sorted(a.alias for a in c.aliases.all())}
 
 
@@ -305,7 +306,8 @@ def clients(request):
         allowed = access_lib.allowed_client_ids(request.user)   # someone limited to some clients sees only those
         if allowed is not None:
             queryset = queryset.filter(pk__in=allowed)
-        return JsonResponse([_client_dict(c) for c in queryset], safe=False)
+        names = client_lib.customer_names(client_lib.source_customers()[0])   # so the table can show each linked customer by name
+        return JsonResponse([_client_dict(c, names) for c in queryset], safe=False)
     if not request.user.is_staff:
         return _error('Forbidden', 403)
     body = _json_body(request)

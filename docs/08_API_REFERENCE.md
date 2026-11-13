@@ -627,9 +627,10 @@ A **client** is the master record. Customers in the source systems are linked to
 Signed in. A list, sorted by name:
 ```json
 [{ "id": 3, "name": "IP Capital: BITCO", "contact_email": "", "notes": "", "is_active": true, "company": { "id": 1, "name": "IP Capital" },
-   "sources": [{ "source": "autotask", "external_id": "101" }, { "source": "ncentral", "external_id": "7" }],
+   "sources": [{ "source": "autotask", "external_id": "101", "customer_name": "IP Capital: BITCO" }, { "source": "ncentral", "external_id": "7", "customer_name": null }],
    "aliases": [] }]
 ```
+**`customer_name`** (added 12 Nov 2026, in this list only) is the name of the linked customer in its source system, so the Clients table can show names and not IDs. It is `null` when the name cannot be read: the source system was unavailable, or the customer is no longer there. It is never guessed. The other client endpoints (create, change, claim) answer without it. A person only ever receives the links of clients they may see.
 `source` is one of `autotask`, `ncentral`, `sentinelone`, `cove`. `external_id` is Autotask `company_id`, N-central `org_unit_id`, SentinelOne `site_id`, Cove customer ID (always a string). `company` is the company that has **claimed** the client, or `null` while it is unclaimed (see *Companies* below). While access is enforced you are only sent the clients you may see.
 
 ### POST `/api/clients` and PUT `/api/clients/{id}`

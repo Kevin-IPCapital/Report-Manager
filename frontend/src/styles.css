@@ -480,3 +480,7 @@ tr.inactive td { opacity: .6; }
 
 /* the last chart, when there is an odd number, takes the whole row once the charts sit side by side */
 @media (min-width: 64em) { .row > .chart:last-child:nth-child(odd) { grid-column: 1 / -1; } }
+
+/* the client and device filters: aligned at the top, so a control that has grown bubbles does not push its neighbour's label down */
+.toolbar.filters { align-items: flex-start; }
+.toolbar.filters .field.multi { min-width: min(16rem, 100%); }

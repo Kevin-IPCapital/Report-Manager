@@ -127,3 +127,38 @@ test('nothing typed matches every device, and the words may be in any of several
   assert.equal(matchesDevice('mailbox', 'Device 7', 'm365-mailboxes'), true);      // the device name or the hostname
   assert.equal(matchesDevice('mailbox', null, undefined), false);                  // nothing to match against
 });
+
+// ---- client and device filters
+import { clientChoices, clientKey, matchesClients, matchesDevices } from './filter.js';
+
+test('a client is told apart by its ID when it has one, and by its customer name when it has not', () => {
+  assert.equal(clientKey(7, 'Acme'), '7');
+  assert.equal(clientKey(null, 'Zed'), 'name:Zed');
+  assert.equal(clientKey(undefined, undefined), 'name:');
+  assert.equal(clientKey(0, 'Zero'), '0');                                           // an ID of 0 is still an ID
+});
+
+test('the choices are the clients on the page, once each, by name', () => {
+  const rows = [{ id: 2, n: 'Zed' }, { id: 1, n: 'acme' }, { id: 2, n: 'Zed (other spelling)' }, { id: null, n: 'Loose Co' }, { id: null, n: '' }];
+  assert.deepEqual(clientChoices(rows, (r) => r.id, (r) => r.n), [{ value: '1', label: 'acme' }, { value: 'name:Loose Co', label: 'Loose Co' }, { value: 'name:', label: 'No customer' }, { value: '2', label: 'Zed' }]);
+  assert.deepEqual(clientChoices([], () => 1, () => 'x'), []);
+});
+
+test('nothing chosen shows every client, and otherwise only the chosen ones', () => {
+  assert.equal(matchesClients([], 5, 'A'), true);
+  assert.equal(matchesClients(['5', '9'], 5, 'A'), true);
+  assert.equal(matchesClients(['5'], 6, 'B'), false);
+  assert.equal(matchesClients(['name:Loose Co'], null, 'Loose Co'), true);
+  assert.equal(matchesClients(['name:Loose Co'], null, 'Other'), false);
+  assert.equal(matchesClients(['5'], null, 'Acme'), false);                                 // an unlinked customer is not client 5 because it is called like it
+});
+
+test('several devices at once: a row matches if it matches any of them, each as a typed name would', () => {
+  assert.equal(matchesDevices([], 'SRV-A'), true);
+  assert.equal(matchesDevices(['srv-a', 'pc-1'], 'SRV-A'), true);
+  assert.equal(matchesDevices(['srv-a', 'pc-1'], 'PC-1'), true);
+  assert.equal(matchesDevices(['srv-a', 'pc-1'], 'SRV-B'), false);
+  assert.equal(matchesDevices(['srv file'], 'SRV-FILE-01'), true);                           // words, as before
+  assert.equal(matchesDevices(['file'], 'SRV-X', 'file-host'), true);                        // any of the names a row has (name or host name)
+  assert.equal(matchesDevices(['zzz'], null, undefined), false);
+});

@@ -132,3 +132,8 @@ test('a grid that fits as many columns as it can never asks for a column wider t
   assert.ok(grids.length >= 6);
   for (const g of grids) assert.match(g, /^minmax\(min\([\d.]+rem,\s*100%\),\s*1fr\)$/, `${g}: a minimum of N rem alone is wider than a small phone's page`);   // the cause of a card sticking out at 320px
 });
+
+test('the client and device filters are aligned at the top, so a control that has grown bubbles does not push its neighbour\'s label down', () => {
+  assert.match(rule('.toolbar.filters {'), /align-items:\s*flex-start/);
+  assert.match(rule('.toolbar.filters .field.multi'), /min-width:\s*min\([\d.]+rem,\s*100%\)/);
+});

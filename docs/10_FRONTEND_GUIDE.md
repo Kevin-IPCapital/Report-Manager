@@ -92,8 +92,9 @@ Two hooks wrap the calls for pages:
 | `patches:device` | The device filter on the patch list | `Patches.jsx` |
 | `patches:trend-range` | The trend's range: all history, the last 3, 6 or 12 months, or one of your saved ranges (`saved:<name>`) | `Patches.jsx` |
 | `ranges:saved` | The date ranges you named and saved (a length such as "last 3 months"; never cleared by forgetting remembered inputs) | `state/SavedRangesContext.jsx` |
-| `servers:filters`, `servers:device`, `servers:sort`, `servers:size` | Server Health tile filters, device filter, sort and card size | `ServerHealth.jsx` |
-| `backups:filters`, `backups:device` | Backups filters | `Backups.jsx` |
+| `servers:filters`, `servers:clients`, `servers:devices`, `servers:sort`, `servers:size` | Server Health: the tile filters, the clients and devices chosen in the two filters, the sort and the card size | `ServerHealth.jsx` |
+| `backups:filters`, `backups:clients`, `backups:devices` | Backups: the chart and tile filters (including Red Flags), and the clients and devices chosen | `Backups.jsx` |
+| `access:tab` | Which tab of the Access page was open (Overview, Employees or Client Groups) | `Access.jsx` |
 | `tickets:filters`, `technicians:filters` | The ticket filters on each ticket page (`<persistKey>:filters`) | `TicketExplorer.jsx` |
 | `table:<name>:sort`, `table:<name>:size` | A table's sort and page size, for `tickets`, `technicians`, `backups`, `patch-categories` and `patch-entries` | `DataTable` |
 
@@ -102,14 +103,14 @@ Two hooks wrap the calls for pages:
 | Page | Route | Gets its data from | What it does |
 |---|---|---|---|
 | **Overview** (`Patches.jsx`) | `/` | sections `patches`, `patch-overview`, `patch-trend`, `patch-entries`; `api.getWeights` and `api.saveWeights` | The Overall Score card **for one client** (with none or several chosen it says "Please select a single client" instead of a combined figure) and a Clients card (choose clients; each becomes a removable bubble), the trend (also one client at a time, with the same prompt), Scores By Client (a group per client, every client or the chosen ones), the score weights panel (with "How is the score calculated?" and, for one client, the working), and the drill-down: a measure, then its categories, then its patches (with a device filter) |
-| **Server Health** | `/server-health` | section `server-health` | Eight tiles, six of which filter when clicked (Endpoints, then Servers, SentinelOne Connected, SentinelOne Disconnected, N-central Connected, N-central Disconnected, Infected, Out Of Date), a device filter, a sort box, and paged cards; each card shows two connection statuses, **SentinelOne Status** and **N-central Status**, and has three sections that open on their own headings (**Expand All** and **Collapse All** above the cards set every section at once): **Performance** (CPU, RAM and disk: "No data" until a source exists), **Patches** (a table with a row for each of the three Overview categories and the columns Last Added, Next Due ("Not collected" for now) and an Up To Date tick, with a flag where something has been missing for more than 14 days; a device N-central cannot find shows a **Disconnected** badge on the heading, even when collapsed, and a note with the date of its last successful inventory) and **Data Collected** (a table: the latest date found for the device on a successful run of SentinelOne, N-central's device and patch inventories, and Cove's backup). No overall "healthy" is shown: that is not defined yet |
-| **Backups** | `/backups` | sections `backups`, `backup-detail` | Backup health tiles, charts, a filterable table, and a detail card for a device |
+| **Server Health** | `/server-health` | section `server-health` | Five tiles, which filter when clicked and are only the ones asked about (Servers, SentinelOne Disconnected, N-central Disconnected, Infected, Out Of Date; three across, then two), a **client filter** and a **multi-device filter** (each holds several values as bubbles; nothing chosen shows everything; both are remembered), a sort box, and paged cards; each card shows two connection statuses, **SentinelOne Status** and **N-central Status**, and has three sections that open on their own headings (**Expand All** and **Collapse All** above the cards set every section at once): **Performance** (CPU, RAM and disk: "No data" until a source exists), **Patches** (a table with a row for each of the three Overview categories and the columns Last Added, Next Due ("Not collected" for now) and an Up To Date tick, with a flag where something has been missing for more than 14 days; a device N-central cannot find shows a **Disconnected** badge on the heading, even when collapsed, and a note with the date of its last successful inventory) and **Data Collected** (a table: the latest date found for the device on a successful run of SentinelOne, N-central's device and patch inventories, and Cove's backup). No overall "healthy" is shown: that is not defined yet |
+| **Backups** | `/backups` | sections `backups`, `backup-detail` | Six tiles (Devices, Warning, Critical, Red Flags, Used Storage, Servers; three across), where Warning, Critical and **Red Flags** filter when clicked (Red Flags keeps the devices with at least one red flag); a **client filter** and a **multi-device filter**; charts; a filterable table, worst first (critical, then warning, then OK; within each the longest since a good backup; **then the most red flags**); and a detail card for a device |
 | **Client Tickets** and **Technician Tickets** | `/tickets`, `/technicians` | section `tickets` | Both are `TicketExplorer`: tiles, charts and the ticket volume trend, filters, and a ticket table with a detail card |
 | **Reports** | `/reports` | `api.getReports`, `saveReport`, `deleteReport`, `getWeights`, and `getSection` (through `report/fetch.js`) | My Reports and Templates, the editor, and generating a PDF for chosen dates |
 | **Data Collection** (staff) | `/collection-health` | `api.getCollectionHealth`, `getCollectionExecution`, `startCollection`, `getCollectorLatestLog` | Each collector's last run and freshness, buttons to run one, and its latest log (polls the queue every 2.5 seconds) |
-| **Clients** (staff) | `/clients` | `api.getClients`, `saveClient`, `claimClient` | The master clients, their links and aliases, and Unclaimed Clients to claim |
+| **Clients** (staff) | `/clients` | `api.getClients`, `saveClient`, `claimClient` | The master clients, their links and aliases, and Unclaimed Clients to claim. The **Linked Customers** column shows the customers' names (the server supplies each link's `customer_name`), once each, and never their IDs; an ID is only on the edit form |
 | **Client Resolution** (staff) | `/clients/resolution` | `api.getResolution`, `resolveClients` | Group and confirm unlinked customers, discrepancies with how long each has lasted, what was resolved recently |
-| **Access** (staff) | `/access` | `api.getAccess`, `saveAccess`, `getCompanies`, `createCompany`, `setUserCompany`, `saveClientGroup`, `deleteClientGroup`, `createPerson`, `updatePerson`, `newSetupLink` | Four panels. **Companies** (platform owner). **Client Groups**: a named list of clients, or all of the company's, made, edited and deleted (a delete asks first). **New Person**: username, names, email, client groups (and, for the owner, a company and an Administrator tick); no password is chosen, and when the person is made a notice says what happened to the email and shows the one-time link with Copy and Dismiss. **People And What They Can See**: each person's company, client groups and clients given one by one, with Save, New Link, and Deactivate or Reactivate (never for yourself); a deactivated row is dimmed with a badge |
+| **Access** (staff) | `/access` | `api.getAccess`, `saveAccess`, `getCompanies`, `createCompany`, `setUserCompany`, `saveClientGroup`, `deleteClientGroup`, `createPerson`, `updatePerson`, `newSetupLink` | Three tabs, in this order (and the one you were on is remembered). **Overview**: the heading, then the subheading "People And What They Can See" over the people table, which is first because it is the purpose of the page: each person's company, **Access** (Admin or Employee; only the platform owner can change it, and it takes effect at once), client groups and clients given one by one, with Save; then, for the platform owner, Companies. **Employees**: **New Employee** (username, names, email, client groups and, for the owner, a company and an Access choice; no password is chosen, and when the person is made a notice says what happened to the email and shows the one-time link with Copy and Dismiss), and **Employee Accounts** (email, access, status, New Link, and Deactivate or Reactivate, never for yourself). **Client Groups**: a named list of clients, or all of the company's, made, edited and deleted (a delete asks first) |
 | **Settings** | `/settings` | none (the browser) | Theme, accent, priority colours, layout, your saved date ranges (add and remove), and forgetting remembered inputs |
 | Sign-in pages | `/`, `/register`, `/forgot`, `/reset` | `api.login` and the others | Shown only while signed out; `Login`, `Register`, `ForgotPassword`, `ResetPassword`, built on `AuthCard` |
 
@@ -127,6 +128,8 @@ Two hooks wrap the calls for pages:
 | `BarChart`, `Donut`, `TrendChart` | `components/BarChart.jsx`, `Donut.jsx`, `TrendChart.jsx` | The three kinds of graph, drawn as SVG with no library; the first two wrap themselves in a `ChartCard` |
 | `TicketExplorer` | `components/TicketExplorer.jsx` | Everything on a ticket page; the two ticket pages are one line each |
 | `DetailModal` | `components/DetailModal.jsx` | The detail card used for a ticket, a device, a patch |
+| `ClientDeviceFilters` | `components/ClientDeviceFilters.jsx` | The client filter and the multi-device filter above Server Health and Backups: two `MultiFilter`s, the clients to choose from taken from the rows on the page and the devices by name |
+| `Tabs` | `components/Tabs.jsx` | A row of tabs, one stop for the Tab key, with the arrow keys, Home and End moving between them; `tabPanelProps` ties each panel to its tab for a screen reader. Used by the Access page |
 | `MultiFilter`, `ChoiceFilter`, `DeviceFilter` | `components/MultiFilter.jsx`, `DataFilter.jsx`, `DeviceFilter.jsx` | A filter holding several values as removable bubbles (with a limit you can set; with `restrict` only the listed options can be chosen, as for a person's client groups), a single-choice filter, and the device-name search |
 | `WeightFields` | `components/WeightFields.jsx` | The score-weight inputs, shared by the Overview and the report editor |
 | `ScoreWorking` | `components/ScoreWorking.jsx` | Under Score Weights on the Overview: how the weights make the score, in plain steps, and, when one client is chosen, the working for that client's scores with its real numbers |
@@ -141,7 +144,8 @@ These modules have no screen in them, so they are tested with Node. **Most of wh
 | Module | What it decides | Tests |
 |---|---|---|
 | `worst.js` | The order each page starts in (worst first) and the Server Health sort choices | `worst.test.js` |
-| `filter.js` | The column search grammar (`>`, `<`, `=`, `!=`, ranges, units) and the device-name filter | `filter.test.js` |
+| `filter.js` | The column search grammar (`>`, `<`, `=`, `!=`, ranges, units), the device-name filter, and the client and multi-device filters (`clientChoices`, `matchesClients`, `matchesDevices`: nothing chosen matches everything; several devices match if any does) | `filter.test.js` |
+| `clientTable.js` | The Clients table's Linked Customers column: names only, each once, with an honest "name not available" when a name could not be read | `clientTable.test.js` |
 | `overview.js` | The Overview's client filter: the choices, the request parameters, what a click on a measure does | `overview.test.js` |
 | `trend.js` | Trend ranges (the built-in ones and yours, all counted the same way), and the ticket volume trend (per day, or per week for a long period) | `trend.test.js` |
 | `serverHealth.js` | The Server Health tiles, their counts and combined filters, and the wording of a card's patching | `serverHealth.test.js` |
@@ -234,6 +238,8 @@ Every source file under `frontend/src`, with what it is for. `docs/SOURCE_INDEX.
 | `src/components/DateRange.jsx` | The date range control: slider, boxes, quick buttons, Refresh |
 | `src/components/DetailModal.jsx` | The detail card used for a ticket, a device and a patch |
 | `src/components/DeviceFilter.jsx` | The device-name search with suggestions |
+| `src/components/ClientDeviceFilters.jsx` | The client filter and the multi-device filter |
+| `src/components/Tabs.jsx` | Tabs with keyboard navigation |
 | `src/components/Donut.jsx` | A donut chart, wrapped in a `ChartCard` |
 | `src/components/Layout.jsx` | The sidebar, header and page frame |
 | `src/components/MultiFilter.jsx` | A filter that holds several values as removable bubbles |
@@ -247,7 +253,8 @@ Every source file under `frontend/src`, with what it is for. `docs/SOURCE_INDEX.
 | `src/components/useApi.js` | Runs a call, tracks loading and error, drives the loading overlay |
 | `src/components/useSection.js` | Fetches a section for the applied date range |
 | `src/dateMath.js` | Date arithmetic on `YYYY-MM-DD` |
-| `src/filter.js` | The column search grammar, and the device-name filter |
+| `src/filter.js` | The column search grammar, the device-name filter, and the client and multi-device filters |
+| `src/clientTable.js` | The Linked Customers column of the Clients table |
 | `src/freshness.js` | The wording and tone for how fresh a collector's data is, and the "data as of" line |
 | `src/gaps.js` | The wording for the record of client gaps |
 | `src/glossary.js` | The hover definitions (`TERMS`), `define` and `hint` |
@@ -264,7 +271,7 @@ Every source file under `frontend/src`, with what it is for. `docs/SOURCE_INDEX.
 | `src/pages/Register.jsx` | Create an account (only while registration is open) |
 | `src/pages/Reports.jsx` | My Reports and Templates, the report editor and generating a PDF |
 | `src/pages/ResetPassword.jsx` | Choose a new password from the emailed link |
-| `src/pages/ServerHealth.jsx` | Server Health: tiles as filters, device filter, sort, paged cards |
+| `src/pages/ServerHealth.jsx` | Server Health: five tiles as filters, the client and multi-device filters, sort, paged cards |
 | `src/pages/Settings.jsx` | Theme, accent, priority colours, layout, and forgetting remembered inputs |
 | `src/pages/TechnicianTickets.jsx` | Tickets by technician (a `TicketExplorer`) |
 | `src/pages/Tickets.jsx` | Tickets by client (a `TicketExplorer`) |

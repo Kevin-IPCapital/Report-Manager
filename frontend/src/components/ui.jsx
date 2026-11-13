@@ -15,6 +15,8 @@ export const StatusBadge = ({ status }) => <span class={`badge ${status}`}>{STAT
 // `scope` picks the page's own definition of a label ("Servers" means one thing on Server Health and another on Backups).
 // A row of four tiles on a wide page, two on a medium one, one on a phone: the classes that make that, for a StatCard inside a `.row`.
 export const TILE_COLS = 'col-12 col-sm-6 col-lg-3';
+// The same for a page with five or six tiles, which sit better three across than four (3 + 2, or 3 + 3).
+export const TILE_COLS_THREE = 'col-12 col-sm-6 col-lg-4';
 
 export function StatCard({ label, value, status, onClick, active, scope, cols = '' }) {
   const body = (<><div class="stat-value">{value}</div><div {...hint(label, 'stat-label', scope)}>{titleCase(label)}</div></>);
