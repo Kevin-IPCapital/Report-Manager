@@ -73,6 +73,9 @@ These pages talk to endpoints I could not run: do `python manage.py migrate` (it
 - [ ] With the limits on (`DJANGO_CLIENT_ACCESS_ENFORCED=1`), a person sees exactly the clients of their groups plus any given one by one, and never another company's.
 
 ## Settings and layout (12 Nov)
+- [ ] Sizes adapt: make the browser window narrower and wider (down to a phone's width). The stat tiles go four across, then two, then one; the charts go two across, then one; the sidebar becomes a bar along the top on a narrow window; and nothing makes the page scroll sideways except a wide table inside its own box.
+- [ ] Text size: set the browser's text size to Large or Very Large (or zoom to 150%). The page grows with it and the layout changes earlier (fewer columns across) instead of being squeezed. Check Server Health, Backups and Access.
+- [ ] Phone width (about 360px): Server Health cards, the Access forms and the Data Collection table fit, and a long word (the setting name on the Access page) wraps.
 - [ ] Settings: Theme and Accent Colour are dropdowns; the accent dot follows the choice; both are remembered after a reload.
 - [ ] On a wide window (1920px or more), the "data as of" line on Server Health, Backups, Client Tickets and Technician Tickets starts at the same left edge as the page heading, in both themes and with the sidebar open or collapsed.
 

@@ -4,7 +4,7 @@ import { PageHeader } from '../components/PageHeader';
 import { DataAsOf } from '../components/DataAsOf';
 import { DeviceFilter } from '../components/DeviceFilter';
 import { Pager } from '../components/Pager';
-import { StatCard, ErrorNote, FilterBubbles, cell } from '../components/ui';
+import { StatCard, TILE_COLS, ErrorNote, FilterBubbles, cell } from '../components/ui';
 import { useApi } from '../components/useApi';
 import { hint } from '../glossary';
 import { isFilters, isOneOf, isPageSize, isText } from '../persisted';
@@ -173,9 +173,9 @@ export function ServerHealth({ title }) {
               <button type="button" class="btn small" onClick={() => setSignal((x) => ({ open: false, version: x.version + 1 }))}>Collapse All</button>
             </div>
           </div>
-          <div class="stats stats-4">
+          <div class="row">
             {tiles.map(({ key, ...t }) => (
-              <StatCard key={t.label} {...t} scope="servers" active={key ? !!active[key] : undefined} onClick={key ? () => toggle(key) : undefined} />
+              <StatCard key={t.label} {...t} scope="servers" cols={TILE_COLS} active={key ? !!active[key] : undefined} onClick={key ? () => toggle(key) : undefined} />
             ))}
           </div>
           <FilterBubbles items={bubbles} />

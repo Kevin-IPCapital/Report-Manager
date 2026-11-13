@@ -7,7 +7,7 @@ import { Donut } from '../components/Donut';
 import { BarChart } from '../components/BarChart';
 import { ChartControls } from '../components/ChartCard';
 import { DetailModal, fact } from '../components/DetailModal';
-import { StatCard, DataTable, ErrorNote, FilterBubbles } from '../components/ui';
+import { StatCard, TILE_COLS, DataTable, ErrorNote, FilterBubbles } from '../components/ui';
 import { useApi } from '../components/useApi';
 import { matchesDevice } from '../filter';
 import { isFilters, isText } from '../persisted';
@@ -114,13 +114,13 @@ export function Backups({ title }) {
       {data?.loaded && (
         <>
           <div class="toolbar"><DeviceFilter value={device} onChange={setDevice} names={all.flatMap((r) => [r.device_name, r.hostname])} /></div>
-          <div class="stats stats-4">
+          <div class="row">
             {tiles.map(({ filter, ...t }) => (
-              <StatCard key={t.label} {...t} scope="backups" active={filter ? filters[filter[0]] === filter[1] : undefined} onClick={filter ? () => toggle(filter[0], filter[1]) : undefined} />
+              <StatCard key={t.label} {...t} scope="backups" cols={TILE_COLS} active={filter ? filters[filter[0]] === filter[1] : undefined} onClick={filter ? () => toggle(filter[0], filter[1]) : undefined} />
             ))}
           </div>
           <ChartControls>
-            <div class="charts">
+            <div class="row">
               {DIMENSIONS.map((d) => {
                 const labels = [...tallyBy(all, d).entries()].sort((a, b) => b[1] - a[1]).map(([label]) => label);   // stable order and colours across filters
                 const colorOf = d.colour ?? ((l) => PALETTE[labels.indexOf(l) % PALETTE.length]);

@@ -22,12 +22,15 @@ export function ChartControls({ children }) {
 }
 
 // Card with a title, a count (left out when `total` is not given) and a minimise button; the body is hidden (not unmounted) while minimised.
-export function ChartCard({ title, total, unit = 'tickets', children }) {
+// `cols` places the card in a `.row`: the whole row on a phone and a tablet, half of it from 64em. It does nothing outside a row (the trend on the Overview is not in one).
+export const CHART_COLS = 'col-12 col-lg-6';
+
+export function ChartCard({ title, total, unit = 'tickets', children, cols = CHART_COLS }) {
   const [open, setOpen] = useState(true);
   const command = useContext(Command);
   useEffect(() => { if (command.n) setOpen(command.open); }, [command.n]);
   return (
-    <section class="panel chart">
+    <section class={`panel chart ${cols}`}>
       <div class="panel-head">
         <h2 {...hint(title)}>{titleCase(title)}</h2>
         <div class="panel-actions">

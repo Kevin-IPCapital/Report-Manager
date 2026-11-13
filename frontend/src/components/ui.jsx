@@ -13,11 +13,14 @@ export const StatusBadge = ({ status }) => <span class={`badge ${status}`}>{STAT
 
 // With onClick the tile is a toggle button (used to filter); `active` shows that it is applied.
 // `scope` picks the page's own definition of a label ("Servers" means one thing on Server Health and another on Backups).
-export function StatCard({ label, value, status, onClick, active, scope }) {
+// A row of four tiles on a wide page, two on a medium one, one on a phone: the classes that make that, for a StatCard inside a `.row`.
+export const TILE_COLS = 'col-12 col-sm-6 col-lg-3';
+
+export function StatCard({ label, value, status, onClick, active, scope, cols = '' }) {
   const body = (<><div class="stat-value">{value}</div><div {...hint(label, 'stat-label', scope)}>{titleCase(label)}</div></>);
   return onClick
-    ? <button type="button" class={`stat clickable ${status || ''} ${active ? 'active' : ''}`} aria-pressed={!!active} onClick={onClick}>{body}</button>
-    : <div class={`stat ${status || ''}`}>{body}</div>;
+    ? <button type="button" class={`stat clickable ${status || ''} ${active ? 'active' : ''} ${cols}`.trim()} aria-pressed={!!active} onClick={onClick}>{body}</button>
+    : <div class={`stat ${status || ''} ${cols}`.trim()}>{body}</div>;
 }
 
 const HEALTH_TONE = { OK: 'good', WARNING: 'warn', CRITICAL: 'bad' };
