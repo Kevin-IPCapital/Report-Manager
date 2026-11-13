@@ -409,3 +409,27 @@ class ExplainScores(SimpleTestCase):
             for t in result['types']:
                 if t['weight_total']:
                     self.assertAlmostEqual(t['weighted_total'] / t['weight_total'], t['score'], delta=0.01)
+
+
+class CustomerNames(SimpleTestCase):
+    """The names that let the Clients table show a linked customer by name, not by ID."""
+
+    def test_each_customer_is_found_by_its_source_and_its_id_as_text(self):
+        from api.clients import customer_names
+        rows = {'autotask': [{'external_id': 101, 'customer_name': 'IP Capital: BITCO'}], 'ncentral': [{'external_id': '7', 'customer_name': 'BitCo'}]}
+        self.assertEqual(customer_names(rows), {('autotask', '101'): 'IP Capital: BITCO', ('ncentral', '7'): 'BitCo'})      # the link table stores the ID as text
+
+    def test_the_same_id_in_two_sources_is_two_customers(self):
+        from api.clients import customer_names
+        rows = {'autotask': [{'external_id': 5, 'customer_name': 'A'}], 'cove': [{'external_id': 5, 'customer_name': 'B'}]}
+        self.assertEqual(customer_names(rows), {('autotask', '5'): 'A', ('cove', '5'): 'B'})
+
+    def test_a_customer_with_no_name_is_left_out_rather_than_given_a_made_up_one(self):
+        from api.clients import customer_names
+        rows = {'cove': [{'external_id': 1, 'customer_name': None}, {'external_id': 2, 'customer_name': ''}, {'external_id': 3, 'customer_name': 'C'}]}
+        self.assertEqual(customer_names(rows), {('cove', '3'): 'C'})
+
+    def test_a_source_that_could_not_be_read_adds_nothing(self):
+        from api.clients import customer_names
+        self.assertEqual(customer_names({}), {})
+        self.assertEqual(customer_names({'cove': []}), {})

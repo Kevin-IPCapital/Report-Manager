@@ -106,3 +106,26 @@ test('backups: ties go by customer then device, and the real rows come out criti
   const rows = worstBackups(real.backups.rows);
   assert.deepEqual(rows.map((r) => r.health), [...rows.map((r) => r.health)].sort((x, y) => ['CRITICAL', 'WARNING', 'OK'].indexOf(x) - ['CRITICAL', 'WARNING', 'OK'].indexOf(y)));
 });
+
+// ---- backups: red flags break a tie (owner, 12 Nov 2026)
+const f = (name, health, days, flags, customer = 'Acme') => ({ ...b(name, health, days, customer), red_flag_count: flags });
+
+test('backups: with the same health and the same days since a good backup, the device with more red flags is worse', () => {
+  const rows = [f('one-flag', 'CRITICAL', 5, 1), f('five-flags', 'CRITICAL', 5, 5), f('no-flags', 'CRITICAL', 5, 0), f('three-flags', 'CRITICAL', 5, 3)];
+  assert.deepEqual(names(worstBackups(rows), 'device_name'), ['five-flags', 'three-flags', 'one-flag', 'no-flags']);
+});
+
+test('backups: red flags never override health or the days since a good backup', () => {
+  const rows = [f('many-flags-ok', 'OK', 1, 20), f('few-flags-critical', 'CRITICAL', 1, 0), f('flags-newer', 'WARNING', 2, 9), f('flags-older', 'WARNING', 8, 0)];
+  assert.deepEqual(names(worstBackups(rows), 'device_name'), ['few-flags-critical', 'flags-older', 'flags-newer', 'many-flags-ok']);   // health first, then days, flags only after both
+});
+
+test('backups: a device with no red flag count is treated as having none, and equal flags fall back to customer then device', () => {
+  const rows = [b('unknown', 'OK', 1), f('zero', 'OK', 1, 0), f('b-two', 'OK', 1, 2, 'Beta'), f('a-two', 'OK', 1, 2, 'Beta'), f('alpha-two', 'OK', 1, 2, 'Alpha')];
+  assert.deepEqual(names(worstBackups(rows), 'device_name'), ['alpha-two', 'a-two', 'b-two', 'unknown', 'zero']);
+});
+
+test('backups: the tie breaker does not change a list that has no red flags anywhere', () => {
+  const rows = [b('ok', 'OK', 1), b('crit', 'CRITICAL', 4), b('warn', 'WARNING', 2)];
+  assert.deepEqual(names(worstBackups(rows), 'device_name'), ['crit', 'warn', 'ok']);
+});

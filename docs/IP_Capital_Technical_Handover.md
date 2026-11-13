@@ -30,13 +30,13 @@ The source-specific PostgreSQL schemas are read directly with schema-qualified q
 | Page | What it is for |
 |----------|-----------------------------------|
 | **Overview** | The Overall Score for one client, a trend, the three patch types and their categories, Scores By Client, and the Score Weights panel with "How is the score calculated?" |
-| **Server Health** | Tiles that filter, a device filter, a sort box (worst first by default) and a card per endpoint, with tiles for SentinelOne and N-central connected and disconnected. Each card shows **SentinelOne Status** and **N-central Status** and has three sections that open on their own headings: **Performance** (CPU, RAM, disk: "No data" until a source exists), **Patches** (a table of the three categories: Last Added, Next Due, Up To Date) and **Data Collected** (the latest date found for the device on each collector) |
-| **Backups** | Cove backup health tiles, charts, a filterable table and a device detail card |
+| **Server Health** | Five tiles that filter (Servers, SentinelOne Disconnected, N-central Disconnected, Infected, Out Of Date: only the bad ones are asked about), a **client filter** and a **multi-device filter**, a sort box (worst first by default) and a card per endpoint. Each card shows **SentinelOne Status** and **N-central Status** and has three sections that open on their own headings: **Performance** (CPU, RAM, disk: "No data" until a source exists), **Patches** (a table of the three categories: Last Added, Next Due, Up To Date) and **Data Collected** (the latest date found for the device on each collector) |
+| **Backups** | Six tiles (Warning, Critical and **Red Flags** filter when clicked), a client filter and a multi-device filter, charts, a table worst first (critical, warning, OK; then the longest since a good backup; then the most red flags) and a device detail card |
 | **Client Tickets, Technician Tickets** | Ticket tiles, charts, a volume trend, filters and a ticket table. Technician data is not collected yet |
 | **Reports** | My Reports and Templates, an editor with a default period, and a PDF for chosen dates |
 | **Data Collection** (staff) | Each collector's last run and freshness, buttons to run one, and its latest log |
-| **Clients, Client Resolution** (staff) | The master client list, and grouping unlinked customers |
-| **Access** (staff) | Client groups; making a new person (with a one-time link to choose a password); each person's groups, clients, and whether they are active (deactivated, never deleted); and, for the platform owner, companies |
+| **Clients, Client Resolution** (staff) | The master client list (its Linked Customers column shows the customers' names, never their IDs), and grouping unlinked customers |
+| **Access** (staff) | Three tabs. **Overview**: the people table, first, with each person's company, **Access (Admin or Employee)**, client groups and clients; and, for the platform owner, companies. **Employees**: make a new employee (with a one-time link to choose a password) and the accounts (new link, deactivate; never deleted). **Client Groups**: named lists of clients |
 | **Settings** | Theme, layout, **saved date ranges** (a length such as "last 3 months" under a name you choose, kept in your browser) and remembered inputs |
 
 # 3. Service ownership (proposed, requires confirmation)
@@ -110,8 +110,8 @@ Entity-relationship diagrams of every schema, and of the links between them, are
 | Autotask | Nothing loaded; two HTTP 401, one HTTP 500 (an Autotask-side email setting) | Disabled until fixed upstream |
 | N-central CPU/RAM/disk | `NO_DATA` for 27 devices | Not shown: Performance says "No data" |
 | Browser check (12 Nov) | Server Health, the Overview and its score working, Data Collection and saved date ranges were driven in headless Chromium against the real backend's output on test data | Five layout defects found and fixed, one of them (the "data as of" line at the left edge on a wide window) first missed by the author and found by you from a screenshot; still to be looked at by you with live data |
-| Your full test run (11 Nov) | 470 tests, 4 failures, all fixed since (archive 46) | Not re-run since the changes after it |
-| Automated tests here | 492 Python tests and 305 JavaScript tests, all passing | The database-backed Django tests (`backend/api/tests.py`) can only be run on your machine: `python manage.py test`. **The new client group and people endpoints and their tests have not been run by the author** |
+| Your full test run (12 Nov) | 671 tests, 670 passed, **including every client group and people test on your database**; the one error was the documentation viewer's read-only test on Windows, which answered a refused write without reading it (fixed) | Run again to confirm the fix |
+| Automated tests here | About 500 Python tests that need no database and over 330 JavaScript tests, all passing | The database-backed Django tests (`backend/api/tests.py`) can only be run on your machine: `python manage.py test` |
 
 # 8. Decisions made by the owner
 
@@ -121,8 +121,9 @@ Entity-relationship diagrams of every schema, and of the links between them, are
 - **`imported_at` (12 Nov):** approved and applied by you; existing rows stay empty. `verify_data` confirms it.
 - **Two connection statuses (12 Nov):** one for SentinelOne and one for N-central, on each card and as separate tiles.
 - **Saved date ranges:** kept in the browser, per person, not on the server.
+- **Layout (12 Nov):** sizes are relative (`rem`, `em`, `%`, `vw`, `vh`), never pixels, and pages are laid out on a 12-column grid (`col-N`, mobile first), so the layout follows the window and the reader's text size. A test forbids pixel sizes.
 - **Server health trend:** closed (12 Nov): the patch and ticket trends are what is wanted.
-- **Client groups and people (12 Nov):** the access work was un-parked at the owner's request. A client group is a named list of clients; a person sees the clients of every group they are in, plus any given one by one. **What an access group is** (my default: a named set of rights) is waiting for the owner's answer.
+- **Client groups and people (12 Nov):** the access work was un-parked at the owner's request. A client group is a named list of clients; a person sees the clients of every group they are in, plus any given one by one. **What an access group is** (my default: a named set of the four rights) is waiting for the owner's answer. The Access page now has three tabs (Overview, Employees, Client Groups) with an Admin or Employee setting for each person.
 - **On hold while the owner speaks with people (12 Nov):** collecting the technician on each ticket, and collecting the N-central patch schedule. Both keep saying "Not collected" and nothing is invented.
 
 # 9. Outstanding work, in priority order
@@ -131,7 +132,7 @@ Entity-relationship diagrams of every schema, and of the links between them, are
 - **P0, security and release:** run the database tests, confirm wrong passwords return 401, rotate credentials that were in shared archives, and work through the production release gates below.
 - **P1, on hold:** technician data (needs Autotask working, then approval to collect it) and the N-central patch schedule (needs approval to collect it), which "Next Due" on Server Health waits for.
 - **P1, left alone for now:** patch scores per device, and the definition of "healthy".
-- **Next:** access groups (ACC-17: my default is a named set of rights, awaiting your answer), the rights themselves, and listing every route with the permission it needs.
+- **Next, as one piece of work:** access groups (ACC-17: my default is a named set of rights, awaiting your answer), the rights themselves, the rule that the Manage right needs every client of the company, a list of every route with the permission it needs, and navigation by rights. The other groups of work, and the decisions each waits for, are in `STAGED_PLAN.md`.
 - **Parked until other people are added:** directors across branches, per-company score weights and report templates, moving a client between companies from the screen, and separate data sources per company. **Do not onboard an unrelated second organisation yet:** score weights and report templates are still shared by everyone.
 - **P3:** refresh this document again after the next round of changes.
 

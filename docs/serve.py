@@ -624,7 +624,19 @@ class Handler(BaseHTTPRequestHandler):
         return self.send_json({'error': 'Not found'}, 404)
 
     def do_POST(self):
-        self.send_json({'error': 'Read-only'}, 405)
+        # Read and throw away whatever was sent BEFORE answering. Answering and closing with the request body still unread makes Windows reset the
+        # connection, so the client sees "connection aborted" instead of the 405 (the documentation test failed that way on 12 Nov 2026).
+        try:
+            length = min(int(self.headers.get('Content-Length') or 0), 1 << 20)
+        except ValueError:
+            length = 0
+        while length > 0:
+            chunk = self.rfile.read(min(length, 65536))
+            if not chunk:
+                break
+            length -= len(chunk)
+        self.close_connection = True
+        self.send_bytes(json.dumps({'error': 'Read-only'}).encode('utf-8'), 'application/json; charset=utf-8', 405, {'Allow': 'GET, HEAD'})
 
     do_PUT = do_DELETE = do_PATCH = do_POST
 

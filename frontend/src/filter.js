@@ -131,3 +131,24 @@ export function matchesDevice(query, ...names) {
   const haystack = names.filter(Boolean).join(' ').toLowerCase();
   return words.every((w) => haystack.includes(w));
 }
+
+// ---- Client and device filters, for the pages with many devices (Server Health, Backups).
+// A client is identified by its client ID when the row is linked to one, and otherwise by its customer name, so unlinked customers can still be chosen.
+export const clientKey = (clientId, name) => (clientId != null ? String(clientId) : `name:${name ?? ''}`);
+
+// The clients that appear in `rows`, for a filter's choices: [{ value, label }] by name. A row with no customer name is "No customer".
+export function clientChoices(rows, idOf, nameOf) {
+  const seen = new Map();
+  for (const row of rows) {
+    const name = nameOf(row);
+    const key = clientKey(idOf(row), name);
+    if (!seen.has(key)) seen.set(key, name || 'No customer');
+  }
+  return [...seen].map(([value, label]) => ({ value, label })).sort((a, b) => a.label.localeCompare(b.label));
+}
+
+// Nothing chosen matches every row; otherwise a row matches when its client is one of those chosen.
+export const matchesClients = (chosen, clientId, name) => !chosen.length || chosen.includes(clientKey(clientId, name));
+
+// Several devices at once: a row matches when it matches ANY of the entries, each worked as matchesDevice does (every word typed appears in a name).
+export const matchesDevices = (chosen, ...names) => !chosen.length || chosen.some((query) => matchesDevice(query, ...names));

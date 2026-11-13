@@ -46,6 +46,12 @@ def tokenise(name):
     return tuple(normalise(name).split())
 
 
+def customer_names(rows):
+    """{(source, external ID as text): customer name} from what source_customers() read, so a client's linked customer can be shown by name and not only by ID.
+    A customer with no name is left out, and a source that could not be read contributes nothing (its links then have no name)."""
+    return {(source, str(r['external_id'])): r['customer_name'] for source, items in rows.items() for r in items if r.get('customer_name')}
+
+
 def _label_list(sources):
     return ', '.join(SOURCE_LABELS[s] for s in sources)
 

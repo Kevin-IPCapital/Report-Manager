@@ -75,11 +75,8 @@ const TERMS = {
   'backups by device type': 'Devices per type. Click a slice or a legend entry to filter the whole page by it; click again to remove the filter.',
   'red flags by category': 'Red flags per category, such as backup currency, retention or lifecycle. Click a bar to show only devices with a flag in that category.',
   // server health (SentinelOne)
-  'servers|endpoints': 'SentinelOne agents (endpoints) that match the active filters. Decommissioned agents are left out.',
   'servers|servers': 'Endpoints SentinelOne classes as servers (machine type server). Click to show only these.',
-  'servers|sentinelone connected': 'Endpoints whose SentinelOne network status reads as connected. Click to show only these.',
   'servers|sentinelone disconnected': 'Endpoints whose SentinelOne network status reads as disconnected, offline or down. Click to show only these.',
-  'servers|n-central connected': 'Servers whose device N-central can find: its newest patch collection worked. Servers with no matching N-central device are in neither N-central tile. Click to show only these.',
   'servers|n-central disconnected': 'Servers whose device N-central cannot find: its newest patch collection answered 404 (device not found). Click to show only these.',
   'servers|infected': 'Endpoints SentinelOne reports as infected. Click to show only these.',
   'servers|out of date': 'Endpoints running an agent version that is not the latest SentinelOne reports as available. Click to show only these.',

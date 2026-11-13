@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { emptyPerson, groupClients, groupRequest, personProblem, personRequest, sameIds, setupNotice } from './access.js';
+import { ACCESS_LEVELS, ACCESS_TABS, accessLabel, accessOf, accessRequest, emptyPerson, groupClients, groupRequest, personProblem, personRequest, sameIds, setupNotice } from './access.js';
 
 const ok = { ...emptyPerson(), username: 'thandi', email: 'thandi@acme.test' };
 
@@ -28,7 +28,7 @@ test('what is sent to make a person is tidy, has no password, and sends rank and
   const body = personRequest({ ...ok, username: ' thandi ', first_name: ' Thandi ', client_groups: ['11', '10'] });
   assert.deepEqual(body, { username: 'thandi', email: 'thandi@acme.test', first_name: 'Thandi', last_name: '', client_groups: [11, 10] });
   assert.ok(!('password' in body) && !('is_staff' in body) && !('company' in body));
-  assert.deepEqual(personRequest({ ...ok, is_staff: true, company: '3' }), { username: 'thandi', email: 'thandi@acme.test', first_name: '', last_name: '', client_groups: [], is_staff: true, company: 3 });
+  assert.deepEqual(personRequest({ ...ok, access: 'admin', company: '3' }), { username: 'thandi', email: 'thandi@acme.test', first_name: '', last_name: '', client_groups: [], is_staff: true, company: 3 });
 });
 
 test('a client group that is all clients sends no list, and a new one sends its company when chosen', () => {
@@ -66,4 +66,32 @@ test('two lists of IDs are the same whatever their order or type', () => {
   assert.equal(sameIds([1, 2], ['2', '1']), true);
   assert.equal(sameIds([1], [1, 2]), false);
   assert.equal(sameIds(undefined, []), true);
+});
+
+test('the page has three tabs, in the order the owner asked for', () => {
+  assert.deepEqual(ACCESS_TABS, [['overview', 'Overview'], ['employees', 'Employees'], ['groups', 'Client Groups']]);
+});
+
+test('access control has two levels for now, Employee and Admin, and a new person starts as an Employee', () => {
+  assert.deepEqual(ACCESS_LEVELS, [['employee', 'Employee'], ['admin', 'Admin']]);
+  assert.equal(emptyPerson().access, 'employee');
+  assert.ok(!('is_staff' in emptyPerson()));
+});
+
+test('a person\'s access is read from what the server says, with the platform owner above both levels', () => {
+  assert.equal(accessOf({ is_owner: true, is_staff: true }), 'owner');
+  assert.equal(accessOf({ is_owner: false, is_staff: true }), 'admin');
+  assert.equal(accessOf({ is_owner: false, is_staff: false }), 'employee');
+  assert.deepEqual(['owner', 'admin', 'employee', 'mystery'].map(accessLabel), ['Owner', 'Admin', 'Employee', 'mystery']);
+});
+
+test('changing a level sends only whether the person is an administrator', () => {
+  assert.deepEqual(accessRequest('admin'), { is_staff: true });
+  assert.deepEqual(accessRequest('employee'), { is_staff: false });
+  assert.deepEqual(accessRequest('anything else'), { is_staff: false });                    // nothing unexpected makes anyone an administrator
+});
+
+test('a new Employee sends no rank, and a new Admin sends it', () => {
+  assert.ok(!('is_staff' in personRequest({ ...ok, access: 'employee' })));
+  assert.equal(personRequest({ ...ok, access: 'admin' }).is_staff, true);
 });

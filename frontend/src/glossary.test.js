@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import { TERM_KEYS, define, hint } from './glossary.js';
 
 // Labels with a meaning of their own on one page, as [label, page scope].
-const SCOPED = [['Devices', 'backups'], ['Servers', 'backups'], ['Endpoints', 'servers'], ['Servers', 'servers'], ['SentinelOne Connected', 'servers'], ['SentinelOne Disconnected', 'servers'], ['N-central Connected', 'servers'], ['N-central Disconnected', 'servers'], ['Infected', 'servers'], ['Out Of Date', 'servers']];
+const SCOPED = [['Devices', 'backups'], ['Servers', 'backups'], ['Servers', 'servers'], ['SentinelOne Disconnected', 'servers'], ['N-central Disconnected', 'servers'], ['Infected', 'servers'], ['Out Of Date', 'servers']];
 
 // Every label a person can hover in the app. If you add a tile, column or chart, add it here and to the glossary.
 const SHOWN_IN_THE_APP = [

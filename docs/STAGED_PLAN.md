@@ -1,7 +1,40 @@
 # Staged plan
 
-Status: **Stage 0 done. Stage 1 tracks A (security), B (collection ops), C (clients), D (backend scoring), E (tickets), F (server health), G (reports), H (shared UI) and I (Cove, except its first live run) built. Done alongside F: FRESH-01 and the Server Health and Backups parts of FILTER-01. Build 2 (SORT-01 and PERSIST-01) is done too, and so is a batch of independent items (REPORT-07, most of RANGE-01 and TREND-02, the ticket trend, the Patches device filter, DATA-03 and DATA-04). Left: OVER-01, REPORT-06 (needs your answer), SCORE-02 and NC-01 (decisions), DATA-01 and TICK-02 (need approval to change live schemas), SRC-01 (your first live Cove run), ACC-01.**
+Status (12 Nov 2026): everything you have asked for so far is built, except what is on hold, left alone, waiting for a decision, or yours to do; all of it is listed in the next section, which is the place to start. The older sections below are kept as the record of how it was decided and built.
 Stage 1 tracks are independent unless a dependency is listed.
+
+## Where things stand, what I need from you, and what can be done together (12 Nov 2026)
+
+### Where things stand
+- **Built, and checked in a headless browser with test data (not yet by you with live data):** Server Health (SERVER-01, SERVER-03, SERVER-04, SERVER-05), Backups (BACKUP-01), Clients (CLIENT-01), the Access page in three tabs (ACC-18), client groups and making people (ACC-02, ACC-03, ACC-05), saved date ranges, the score working, Settings dropdowns, relative sizes and the 12-column grid (UX-11), and the layout fixes (UX-10).
+- **Your full test run on 12 Nov:** 671 tests, 670 passed. That includes every client group and people test against your real database. The one error was the documentation viewer on Windows (TEST-01), which is fixed; please run the tests again to confirm. The new database test for the Clients list (CLIENT-01) has only run on my side up to its pure part.
+- **Here:** about 500 Python tests that need no database, and over 330 JavaScript tests, all passing.
+
+### Decisions waiting on you, each with my default
+| # | The decision | My default if you say nothing | What it unblocks |
+|---|---|---|---|
+| 1 | **What is an access group?** (ACC-17) | A named set of the four rights (make new clients, resolve client resolutions, manage data collection, edit the shared weights), kept per company, a person can be in several, an administrator has all of them | Everything in group 1 below |
+| 2 | **Should a server N-central cannot find count in the worst-first order on Server Health?** | No: the order looks at SentinelOne's status only; N-central's shows in its tile and on the card | A small change to the ordering rules |
+| 3 | **What does "healthy" mean** (SCORE-02): all three patch categories, or just one? | Not defined: nothing shows a verdict for a whole server | Group 2 below |
+| 4 | **Do you want a report of why only 3 of your 14 servers matched an N-central device?** | Not built until asked; it is one small read-only command that lists each unmatched server and the closest N-central names in its client | Group 4 below, and whether servers need a better matching rule |
+| 5 | **When to collect more from the sources**: the N-central patch schedule (SERVER-02) and the technician on each ticket (TICK-02) | On hold, as you said, while you speak with some people; nothing is invented meanwhile ("Next Due" says Not collected) | Group 3 below |
+| 6 | **Convert the clients given to people one by one into client groups?** (ACC-08) | Leave them: they still work and are added to what groups give | Part of group 1 |
+
+### What can be done together
+| Group | What is in it | Why together | Needs first | Size |
+|---|---|---|---|---|
+| **1. Rights** | Access groups (ACC-17), the rights per person (ACC-04), the rule that the Manage right needs every client of the company (ACC-06), a list of every route with the permission it needs and a test that fails if a route has none (ACC-07), the navigation showing only what a person may use (ACC-09), and converting individually given clients (ACC-08) | They share one model and one place that enforces it, so they are one piece of work and one round of tests | Decision 1 | The largest: server, screen and tests |
+| **2. "Healthy"** | The definition (SCORE-02), patch scores per device (PATCH-02), and an overall status on Server Health, plus decision 2 | All of it hangs on one definition | Decision 3 | Medium |
+| **3. More from the sources** | The patch schedule (SERVER-02) and the technician on tickets (TICK-02) | Both change what a collector reads and stores, so one approval to change the live schemas and one run of each collector covers both | Decision 5, and Autotask working for the technician | Medium, and touches your databases |
+| **4. N-central matching** | The report (decision 4), and, if it shows a pattern, a better rule or reasons shown on the cards | Independent of everything else | Decision 4 | Small; could be done now |
+| **5. Yours, in one sitting** | Real email settings (so the new-employee links are emailed), run the N-central jobs and the snapshot backfill, fix Autotask, set the platform owner and switch the limits on when you are happy, and the release gates | None of it needs me, and the order matters: email settings and groups first, limits last | Nothing | An afternoon |
+| **6. Parked until a second organisation is added** | Directors across branches (ACC-13), shared weights and templates per company (ACC-15), moving a client between companies from the screen (ACC-16), separate data sources per company (FUT-01) | Only matter once there is a second company | Your word that one is coming | Large |
+
+**Order I would take:** group 4 whenever you say (it is small and tells us whether servers are being missed); group 5 alongside everything; then group 1, because you have already started to ask for it; groups 2 and 3 only when you have decided.
+
+### What stays as it is
+- **Closed:** the server health trend (TREND-01). **Left alone by you:** PATCH-02 and SCORE-02, which are in group 2. **On hold:** SERVER-02 and TICK-02, which are in group 3.
+- **Kept up to date as we go:** the handover document is refreshed after each group, not each change.
 
 ## Decisions taken
 - Access control comes last, using Django groups plus a user-to-client link (built-in permissions are not row-level). Until then

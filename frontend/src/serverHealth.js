@@ -1,5 +1,4 @@
 // Server Health: which endpoints count as connected, what each filter tile selects, and what the tiles count. Pure, so it can be tested.
-import { matchesDevice } from './filter.js';
 import { shortDate } from './gaps.js';
 
 // The values come from the data, so the network status is read loosely.
@@ -11,18 +10,17 @@ export function connectionOf(status) {
 }
 export const CONNECTION_TONE = { connected: 'good', disconnected: 'bad', unknown: 'warn' };
 
-// There are two connection statuses, one from each system. SentinelOne's is its agent's network status. N-central's is whether it can find the device,
-// judged from its newest patch collection (NC-01): connected when that worked, disconnected when N-central answered 404 (device not found). A server with
-// no matching N-central device has no N-central status, so it is in neither N-central tile. (The first four tiles' keys are what is remembered between visits.)
+// There are two connection statuses, one from each system, and the page only asks about the bad ones (the owner's rule, 12 Nov 2026: "we only care about
+// disconnected"). SentinelOne's is its agent's network status. N-central's is whether it can find the device, judged from its newest patch collection (NC-01):
+// disconnected when N-central answered 404 (device not found). A server with no matching N-central device has no N-central status, so it is in neither
+// count. The keys are what is remembered between visits.
 export const ncentralState = (s) => (s.patches?.status === 'matched' ? s.patches.collection?.state ?? null : null);
 
-// The tiles that filter. `excludes` is the filter that cannot be on at the same time.
+// The tiles that filter. Filters stack: with several on, a server must pass all of them.
 export const TILE_FILTERS = {
   servers: { label: 'Servers', test: (s) => String(s.machine_type ?? '').toLowerCase() === 'server' },
-  connected: { label: 'SentinelOne Connected', test: (s) => connectionOf(s.network_status) === 'connected', excludes: 'disconnected' },
-  disconnected: { label: 'SentinelOne Disconnected', test: (s) => connectionOf(s.network_status) === 'disconnected', excludes: 'connected' },
-  ncConnected: { label: 'N-central Connected', test: (s) => ncentralState(s) === 'ok', excludes: 'ncDisconnected' },
-  ncDisconnected: { label: 'N-central Disconnected', test: (s) => ncentralState(s) === 'disconnected', excludes: 'ncConnected' },
+  disconnected: { label: 'SentinelOne Disconnected', test: (s) => connectionOf(s.network_status) === 'disconnected' },
+  ncDisconnected: { label: 'N-central Disconnected', test: (s) => ncentralState(s) === 'disconnected' },
   infected: { label: 'Infected', test: (s) => s.infected === true },
   outdated: { label: 'Out Of Date', test: (s) => s.is_up_to_date === false },
 };
@@ -30,17 +28,15 @@ export const TILE_FILTERS = {
 // Turn one tile filter on or off. Turning on connected turns off disconnected, and the other way round.
 export function toggleFilter(active, key) {
   const { [key]: wasOn, ...rest } = active;
-  if (wasOn) return rest;
-  const { [TILE_FILTERS[key].excludes]: _dropped, ...kept } = rest;
-  return { ...kept, [key]: true };
+  return wasOn ? rest : { ...rest, [key]: true };
 }
 
-export const applyFilters = (rows, active, device = '') => rows.filter((s) => Object.keys(active).every((k) => !active[k] || TILE_FILTERS[k].test(s)) && matchesDevice(device, s.computer_name));
+export const applyFilters = (rows, active) => rows.filter((s) => Object.keys(active).every((k) => !active[k] || TILE_FILTERS[k].test(s)));
 
 // What the tiles show, for the rows that match. Unknown values (a missing infected flag, an unknown status) are not counted as bad.
 export function tileCounts(rows) {
   const count = (test) => rows.filter(test).length;
-  return { endpoints: rows.length, ...Object.fromEntries(Object.entries(TILE_FILTERS).map(([key, f]) => [key, count(f.test)])) };
+  return { ...Object.fromEntries(Object.entries(TILE_FILTERS).map(([key, f]) => [key, count(f.test)])) };
 }
 
 // ---- patching on a card. `patches` is the server's `patches` from the API: {status, device_name, categories}.

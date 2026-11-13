@@ -12,7 +12,7 @@ import { BarChart } from './BarChart';
 import { ChartCard, ChartControls } from './ChartCard';
 import { DataAsOf } from './DataAsOf';
 import { DetailModal, fact } from './DetailModal';
-import { StatCard, DataTable, ErrorNote, FilterBubbles } from './ui';
+import { StatCard, TILE_COLS, DataTable, ErrorNote, FilterBubbles } from './ui';
 import { useSection } from './useSection';
 import { formatDuration } from '../text';
 
@@ -107,13 +107,13 @@ export function TicketExplorer({ title, dimensions, persistKey }) {
       {unavailable.map((d) => <p key={d.key} class="note" role="status">{d.unavailable}</p>)}
       {data && (
         <>
-          <div class="stats stats-4">
+          <div class="row">
             {tiles.map(({ filter, ...t }) => (
-              <StatCard key={t.label} {...t} active={filter ? !!filters[filter] : undefined} onClick={filter ? () => toggle(filter, true) : undefined} />
+              <StatCard key={t.label} {...t} active={filter ? !!filters[filter] : undefined} onClick={filter ? () => toggle(filter, true) : undefined} cols={TILE_COLS} />
             ))}
           </div>
           <ChartControls>
-          <div class="charts">
+          <div class="row">
             {shown.map((d) => {
               const labels = countBy(all, d.key).map((s) => s.label); // stable order and colours across filters
               const colorOf = d.colour ?? ((l) => PALETTE[labels.indexOf(l) % PALETTE.length]);

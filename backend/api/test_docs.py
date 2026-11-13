@@ -591,11 +591,21 @@ class DocumentationViewerOverHttp(SimpleTestCase):
         self.assertEqual(self.get('/api/tree', {'Host': 'localhost:1'})[0], 200)
 
     def test_it_is_read_only(self):
-        for method in ('POST', 'PUT', 'DELETE'):
-            request = urllib.request.Request(self.base + '/api/tree', data=b'x' if method != 'DELETE' else None, method=method)
+        # A body big enough that the server must read it: if it answered and closed without reading what was sent, Windows resets the connection and the
+        # client sees "connection aborted" instead of the 405 (this test failed that way on 12 Nov 2026, when it had been sent a single byte).
+        for method in ('POST', 'PUT', 'DELETE', 'PATCH'):
+            request = urllib.request.Request(self.base + '/api/tree', data=b'x' * 200_000 if method != 'DELETE' else None, method=method)
             with self.assertRaises(urllib.error.HTTPError) as caught:
                 urllib.request.urlopen(request, timeout=10)
-            self.assertEqual(caught.exception.code, 405)
+            self.assertEqual(caught.exception.code, 405, method)
+            self.assertEqual(caught.exception.headers['Allow'], 'GET, HEAD', method)
+            self.assertEqual(json.loads(caught.exception.read())['error'], 'Read-only', method)
+
+    def test_it_stays_usable_after_a_refused_write(self):
+        request = urllib.request.Request(self.base + '/api/tree', data=b'y' * 100_000, method='POST')
+        with self.assertRaises(urllib.error.HTTPError):
+            urllib.request.urlopen(request, timeout=10)
+        self.assertEqual(self.get('/api/tree')[0], 200)
 
     def test_the_page_javascript_is_valid_and_its_flows_run(self):
         node = shutil.which('node')

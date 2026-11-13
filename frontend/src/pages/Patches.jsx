@@ -127,7 +127,7 @@ const pct2 = (v) => (v == null ? '—' : `${v.toFixed(2)}%`);
 // never narrowed by the filter, so every client stays on screen with the chosen ones highlighted.
 function ClientsCard({ clients, choices, onToggle }) {
   return (
-    <section class="panel clients-card">
+    <section class="panel clients-card col-12 col-lg-7 col-xl-8">
       <h2>Clients</h2>
       {clients.length === 0 ? <p class="note">No clients have patch data yet.</p> : (
         <div class="client-chips" role="group" aria-label="Filter by client">
@@ -223,8 +223,8 @@ export function Patches({ title }) {
       )}
       {data && (
         <>
-          <div class="overview-top">
-            <section class="panel overall">
+          <div class="row row-tight">
+            <section class="panel overall col-12 col-lg-5 col-xl-4">
               <h2 {...hint('Overall Score')}>Overall Score{single ? `: ${labelOf(single, clients)}` : ''}</h2>
               {single ? (
                 <>

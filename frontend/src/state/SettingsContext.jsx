@@ -18,7 +18,7 @@ export function SettingsProvider({ children }) {
   const [accent, setAccent] = usePersisted('ops_accent', 'indigo');
   const [savedPriority, setSavedPriority] = usePersisted('ops_priority_colours', defaultPriorityColours);
   const priorityColours = { ...defaultPriorityColours, ...savedPriority };
-  const [navCollapsed, setNavCollapsed] = usePersisted('ops_nav_collapsed', matchMedia('(max-width: 760px)').matches);
+  const [navCollapsed, setNavCollapsed] = usePersisted('ops_nav_collapsed', matchMedia('(max-width: 48em)').matches);
   const [resolved, setResolved] = useState('light');
   const [squareCorners, setSquareCorners] = usePersisted('ops_square', false);
   const [cardShadows, setCardShadows] = usePersisted('ops_shadows', true);

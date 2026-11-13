@@ -83,6 +83,8 @@ Paths are relative to the project folder (`ops-dashboard/`). The first line of e
 - `frontend/src/access.js` — The Access page's logic, pure so it can be tested: checking a new person before it is sent (the same rules the server applies, so a mistake shows at once and
 - `frontend/src/access.test.js`
 - `frontend/src/charts.test.js`
+- `frontend/src/clientTable.js` — The Clients table's "Linked Customers" column: the names of the customers a client is linked to, and not their IDs (owner, 12 Nov 2026). The IDs are still on the
+- `frontend/src/clientTable.test.js`
 - `frontend/src/dateMath.js` — Small date helpers on local dates written YYYY-MM-DD (toISOString would shift the day in other time zones).
 - `frontend/src/declarations.test.js`
 - `frontend/src/filter.js` — Column search. Text columns match "contains" (case-insensitive, on what the cell shows). Number, percentage, duration and date
@@ -124,6 +126,7 @@ Paths are relative to the project folder (`ops-dashboard/`). The first line of e
 - `frontend/src/components/AuthCard.jsx`
 - `frontend/src/components/BarChart.jsx`
 - `frontend/src/components/ChartCard.jsx`
+- `frontend/src/components/ClientDeviceFilters.jsx`
 - `frontend/src/components/DataAsOf.jsx`
 - `frontend/src/components/DataFilter.jsx` — A single-choice filter where each choice has a value and a label (the client a patch section is for).
 - `frontend/src/components/DateRange.jsx`
@@ -136,6 +139,7 @@ Paths are relative to the project folder (`ops-dashboard/`). The first line of e
 - `frontend/src/components/Pager.jsx`
 - `frontend/src/components/Period.jsx`
 - `frontend/src/components/ScoreWorking.jsx`
+- `frontend/src/components/Tabs.jsx` — Tabs: a row of buttons that switch between panels. Reached with the Tab key as one stop; the arrow keys, Home and End move between them, as in any set of tabs.
 - `frontend/src/components/TicketExplorer.jsx`
 - `frontend/src/components/TrendChart.jsx`
 - `frontend/src/components/WeightFields.jsx` — The weight boxes for each patch type and its categories. Shared by the Patches page (your own and the shared weights) and by

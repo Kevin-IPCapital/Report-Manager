@@ -19,39 +19,30 @@ test('network status is read loosely: disconnected wins over connect, and an unf
 });
 
 test('the tiles count what they say, and unknown values are not counted as bad', () => {
-  assert.deepEqual(tileCounts(fleet), { endpoints: 5, servers: 2, connected: 3, disconnected: 1, ncConnected: 0, ncDisconnected: 0, infected: 1, outdated: 1 });   // PC-SALES has null flags: neither infected nor out of date; none of these has any N-central information
+  assert.deepEqual(tileCounts(fleet), { servers: 2, disconnected: 1, ncDisconnected: 0, infected: 1, outdated: 1 });   // PC-SALES has null flags: neither infected nor out of date; none of these has any N-central information
 });
 
 test('a tile filter keeps only what it names, and several filters all apply', () => {
   assert.deepEqual(applyFilters(fleet, { servers: true }).map((s) => s.computer_name), ['SRV-FILE-01', 'SRV-DB-01']);
-  assert.deepEqual(applyFilters(fleet, { servers: true, connected: true }).map((s) => s.computer_name), ['SRV-FILE-01']);
+  assert.deepEqual(applyFilters(fleet, { servers: true, disconnected: true }).map((s) => s.computer_name), ['SRV-DB-01']);
   assert.deepEqual(applyFilters(fleet, { outdated: true }).map((s) => s.computer_name), ['SRV-DB-01']);
   assert.equal(applyFilters(fleet, {}).length, 5);
   assert.equal(applyFilters(fleet, { infected: false }).length, 5);   // a filter set to off is not a filter
 });
 
-test('connected and disconnected cannot both be on; turning one on turns the other off, and a second click turns it off', () => {
-  let active = toggleFilter({}, 'connected');
-  assert.deepEqual(active, { connected: true });
-  active = toggleFilter(active, 'disconnected');
-  assert.deepEqual(active, { disconnected: true });
-  assert.deepEqual(toggleFilter(active, 'disconnected'), {});
-  assert.deepEqual(toggleFilter({ servers: true }, 'infected'), { servers: true, infected: true });   // independent filters stack
-});
-
-test('the device filter matches parts of a name, case-insensitively, together with a tile filter', () => {
-  assert.deepEqual(applyFilters(fleet, {}, 'srv').map((s) => s.computer_name), ['SRV-FILE-01', 'SRV-DB-01']);
-  assert.deepEqual(applyFilters(fleet, {}, 'srv file').map((s) => s.computer_name), ['SRV-FILE-01']);
-  assert.deepEqual(applyFilters(fleet, { servers: true }, 'db').map((s) => s.computer_name), ['SRV-DB-01']);
-  assert.deepEqual(applyFilters(fleet, { infected: true }, 'srv'), []);
+test('a tile filter turns on with one click and off with the next, and different filters stack', () => {
+  assert.deepEqual(toggleFilter({}, 'disconnected'), { disconnected: true });
+  assert.deepEqual(toggleFilter({ disconnected: true }, 'disconnected'), {});
+  assert.deepEqual(toggleFilter({ servers: true }, 'infected'), { servers: true, infected: true });
+  assert.deepEqual(toggleFilter({ disconnected: true }, 'ncDisconnected'), { disconnected: true, ncDisconnected: true });   // turning one on does not turn the other off
 });
 
 test('the real API rows work with every filter and tile', () => {
   assert.ok(real.length > 0);
   const counts = tileCounts(real);
-  assert.equal(counts.endpoints, real.length);
   assert.equal(counts.servers, real.filter((s) => s.machine_type === 'server').length);
-  assert.equal(applyFilters(real, { servers: true }, real[0].computer_name.slice(0, 3)).every((s) => s.machine_type === 'server'), true);
+  assert.equal(applyFilters(real, { servers: true }).every((s) => s.machine_type === 'server'), true);
+  assert.equal(applyFilters(real, { ncDisconnected: true }).length, counts.ncDisconnected);
 });
 
 // ---- patching on a card
@@ -214,42 +205,30 @@ const mixed = [
   withNc('SRV-D', 'matched', null),
   withNc('SRV-E', 'no-match', null),
   agent('SRV-F'),                                                                   // an older answer with no patching at all
+  withNc('SRV-G', 'matched', 'ok', { network_status: 'disconnected' }),             // disconnected from SentinelOne, yet N-central can find it
 ];
 
 test('the N-central state is only read from a matched server, and anything else has none', () => {
-  assert.deepEqual(mixed.map(ncentralState), ['ok', 'disconnected', 'failed', null, null, null]);
+  assert.deepEqual(mixed.map(ncentralState), ['ok', 'disconnected', 'failed', null, null, null, 'ok']);
 });
 
-test('the N-central tiles count servers by whether N-central can find them, and a server it cannot match is in neither', () => {
+test('the disconnected tiles count the servers each system cannot reach, and a server with no N-central match is in the N-central count never', () => {
   const counts = tileCounts(mixed);
-  assert.deepEqual([counts.ncConnected, counts.ncDisconnected], [1, 1]);
-  assert.equal(counts.endpoints, 6);                                                // failed, never collected and unmatched servers are counted as neither connected nor disconnected
+  assert.deepEqual([counts.disconnected, counts.ncDisconnected], [2, 1]);                  // SRV-B and SRV-G for SentinelOne; only SRV-B for N-central
+  assert.ok(!('endpoints' in counts) && !('connected' in counts) && !('ncConnected' in counts));   // only the bad ones are asked about
 });
 
-test('the SentinelOne tiles and the N-central tiles are independent: a server can be connected to one and disconnected from the other', () => {
-  const sentinelOnly = applyFilters(mixed, { connected: true }).map((s) => s.computer_name);
-  const ncOnly = applyFilters(mixed, { ncDisconnected: true }).map((s) => s.computer_name);
-  assert.deepEqual(sentinelOnly, ['SRV-A', 'SRV-C', 'SRV-D', 'SRV-E', 'SRV-F']);
-  assert.deepEqual(ncOnly, ['SRV-B']);
-  assert.deepEqual(applyFilters(mixed, { disconnected: true, ncDisconnected: true }).map((s) => s.computer_name), ['SRV-B']);
-  assert.deepEqual(applyFilters(mixed, { connected: true, ncDisconnected: true }), []);          // connected to SentinelOne and not found by N-central: none here
+test('the SentinelOne and N-central statuses are independent: a server can be disconnected from one and not the other', () => {
+  const names = (active) => applyFilters(mixed, active).map((s) => s.computer_name);
+  assert.deepEqual(names({ disconnected: true }), ['SRV-B', 'SRV-G']);
+  assert.deepEqual(names({ ncDisconnected: true }), ['SRV-B']);
+  assert.deepEqual(names({ disconnected: true, ncDisconnected: true }), ['SRV-B']);
 });
 
-test('each pair of connection tiles is contradictory only within itself', () => {
-  let active = toggleFilter({}, 'ncConnected');
-  active = toggleFilter(active, 'ncDisconnected');
-  assert.deepEqual(active, { ncDisconnected: true });                               // N-central connected turned off
-  active = toggleFilter(active, 'connected');
-  assert.deepEqual(active, { ncDisconnected: true, connected: true });              // the SentinelOne pair does not touch the N-central pair
-  active = toggleFilter(active, 'disconnected');
-  assert.deepEqual(active, { ncDisconnected: true, disconnected: true });
-  assert.deepEqual(toggleFilter(active, 'ncDisconnected'), { disconnected: true });
-});
-
-test('the tile labels say whose connection they count, and the remembered keys of the first two are unchanged', () => {
-  assert.deepEqual([TILE_FILTERS.connected.label, TILE_FILTERS.disconnected.label, TILE_FILTERS.ncConnected.label, TILE_FILTERS.ncDisconnected.label],
-    ['SentinelOne Connected', 'SentinelOne Disconnected', 'N-central Connected', 'N-central Disconnected']);
-  assert.ok(Object.keys(TILE_FILTERS).includes('connected') && Object.keys(TILE_FILTERS).includes('disconnected'));   // what people already have remembered still means the same
+test('the tiles are only the ones asked for, in order, and the remembered keys of the ones kept are unchanged', () => {
+  assert.deepEqual(Object.keys(TILE_FILTERS), ['servers', 'disconnected', 'ncDisconnected', 'infected', 'outdated']);
+  assert.deepEqual([TILE_FILTERS.disconnected.label, TILE_FILTERS.ncDisconnected.label], ['SentinelOne Disconnected', 'N-central Disconnected']);
+  for (const gone of ['connected', 'ncConnected']) assert.ok(!(gone in TILE_FILTERS), `${gone} is no longer a tile`);
 });
 
 test('the N-central status says connected, disconnected, a failed collection, not collected or unknown, each with a reason', () => {

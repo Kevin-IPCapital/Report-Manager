@@ -2,6 +2,7 @@ import { useState } from 'preact/hooks';
 import { api } from '../api/adapter';
 import { useAuth } from '../auth/AuthContext';
 import { PageHeader } from '../components/PageHeader';
+import { linkedCustomers } from '../clientTable';
 import { DataTable, ErrorNote } from '../components/ui';
 import { useApi } from '../components/useApi';
 
@@ -14,7 +15,7 @@ const COLUMNS = [
   { key: 'aliases_text', label: 'Also Known As', wrap: true }, { key: 'contact_email', label: 'Contact Email' },
   { key: 'is_active', label: 'Active', type: 'bool' },
 ];
-const show = (c) => ({ ...c, company_text: c.company?.name ?? 'Unclaimed', sources_text: c.sources.map((s) => `${SOURCE_NAME[s.source]} ${s.external_id}`).join(' · '), aliases_text: c.aliases.join(', ') });
+const show = (c) => ({ ...c, company_text: c.company?.name ?? 'Unclaimed', sources_text: linkedCustomers(c.sources, SOURCE_NAME), aliases_text: c.aliases.join(', ') });
 
 function ClientForm({ client, onCancel, onSaved }) {
   const [form, setForm] = useState({ name: '', contact_email: '', notes: '', is_active: true, sources: [], ...client, aliasText: (client.aliases ?? []).join('\n') });

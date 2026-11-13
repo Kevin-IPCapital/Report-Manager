@@ -18,3 +18,6 @@ export const isOneOf = (options) => (v) => options.includes(v);
 
 // Keep a remembered sort only if its column is still there.
 export const usableSort = (sort, columns) => (sort && columns.some((c) => c.key === sort.key) ? sort : null);
+
+// A remembered list of short texts (the clients and devices chosen in a filter): at most `max` entries, each a short string.
+export const isStrings = (max = 50) => (v) => Array.isArray(v) && v.length <= max && v.every((s) => typeof s === 'string' && s.length > 0 && s.length <= 200);

@@ -2,12 +2,13 @@ import { useEffect, useState } from 'preact/hooks';
 import { api } from '../api/adapter';
 import { PageHeader } from '../components/PageHeader';
 import { DataAsOf } from '../components/DataAsOf';
-import { DeviceFilter } from '../components/DeviceFilter';
+import { ClientDeviceFilters } from '../components/ClientDeviceFilters';
 import { Pager } from '../components/Pager';
-import { StatCard, ErrorNote, FilterBubbles, cell } from '../components/ui';
+import { StatCard, TILE_COLS_THREE, ErrorNote, FilterBubbles, cell } from '../components/ui';
 import { useApi } from '../components/useApi';
 import { hint } from '../glossary';
-import { isFilters, isOneOf, isPageSize, isText } from '../persisted';
+import { clientChoices, matchesClients, matchesDevices } from '../filter';
+import { isFilters, isOneOf, isPageSize, isStrings } from '../persisted';
 import { paginate } from '../pagination';
 import { usePersistentState } from '../state/persist';
 import { SERVER_SORTS, SERVER_SORT_KEYS, sortServers } from '../worst';
@@ -15,8 +16,8 @@ import { CONNECTION_TONE, TILE_FILTERS, applyFilters, collectedView, connectionO
 import { formatDuration, titleCase } from '../text';
 
 const CARD_SIZES = [12, 24, 48, 96];
-// Remembered tile filters must be real ones, switched on, and not the contradictory pair.
-const isTileFilters = (v) => isFilters(v) && Object.entries(v).every(([k, on]) => TILE_FILTERS[k] && on === true) && !(v.connected && v.disconnected) && !(v.ncConnected && v.ncDisconnected);
+// Remembered tile filters must be real ones, and switched on.
+const isTileFilters = (v) => isFilters(v) && Object.entries(v).every(([k, on]) => TILE_FILTERS[k] && on === true);
 
 // One section of a card. It opens and closes on its own heading; "Expand All" and "Collapse All" above the cards set every section at once
 // (`signal` changes when one is pressed), and a card that appears later on another page starts as the last one pressed left things.
@@ -126,32 +127,31 @@ function ServerCard({ s, grace, signal }) {
 export function ServerHealth({ title }) {
   const { data, error } = useApi(() => api.getSection('server-health'), []);
   const [active, setActive] = usePersistentState('servers:filters', {}, isTileFilters);     // which tile filters are on
-  const [device, setDevice] = usePersistentState('servers:device', '', isText);
+  const [clients, setClients] = usePersistentState('servers:clients', [], isStrings());   // the clients chosen in the client filter
+  const [devices, setDevices] = usePersistentState('servers:devices', [], isStrings());   // the devices chosen in the device filter
   const [sortKey, setSortKey] = usePersistentState('servers:sort', 'worst', isOneOf(SERVER_SORT_KEYS));
   const [size, setSize] = usePersistentState('servers:size', CARD_SIZES[1], isPageSize(CARD_SIZES));
   const [page, setPage] = useState(0);
   const [signal, setSignal] = useState({ open: false, version: 0 });   // Expand All / Collapse All: every card section follows the last one pressed
 
   const all = data?.servers ?? [];
-  const rows = sortServers(applyFilters(all, active, device), sortKey);
+  const clientOptions = clientChoices(all, (s) => s.client_id, (s) => s.customer_name);
+  const narrowed = all.filter((s) => matchesClients(clients, s.client_id, s.customer_name) && matchesDevices(devices, s.computer_name));
+  const rows = sortServers(applyFilters(narrowed, active), sortKey);
   const counts = tileCounts(rows);
   const view = paginate(rows, page, size);
   useEffect(() => setPage(0), [rows.length]);   // a different set of cards starts again from the first page
 
   const toggle = (key) => { setActive((a) => toggleFilter(a, key)); setPage(0); };
   const tiles = [
-    { label: 'Endpoints', value: counts.endpoints },
     { label: 'Servers', value: counts.servers, key: 'servers' },
-    { label: 'SentinelOne Connected', value: counts.connected, status: 'good', key: 'connected' },
     { label: 'SentinelOne Disconnected', value: counts.disconnected, status: counts.disconnected ? 'bad' : 'good', key: 'disconnected' },
-    { label: 'N-central Connected', value: counts.ncConnected, status: 'good', key: 'ncConnected' },
     { label: 'N-central Disconnected', value: counts.ncDisconnected, status: counts.ncDisconnected ? 'bad' : 'good', key: 'ncDisconnected' },
     { label: 'Infected', value: counts.infected, status: counts.infected ? 'bad' : 'good', key: 'infected' },
     { label: 'Out Of Date', value: counts.outdated, status: counts.outdated ? 'warn' : 'good', key: 'outdated' },
   ];
   const bubbles = [
     ...Object.keys(active).map((key) => ({ label: 'Show', value: TILE_FILTERS[key].label, onRemove: () => toggle(key) })),
-    ...(device.trim() ? [{ label: 'Device', value: device.trim(), onRemove: () => setDevice('') }] : []),
   ];
 
   return (
@@ -161,8 +161,9 @@ export function ServerHealth({ title }) {
       <ErrorNote error={error} />
       {data && (
         <>
+          <ClientDeviceFilters clients={clients} onClients={(v) => { setClients(v); setPage(0); }} clientOptions={clientOptions}
+            devices={devices} onDevices={(v) => { setDevices(v); setPage(0); }} deviceNames={all.map((s) => s.computer_name)} />
           <div class="toolbar">
-            <DeviceFilter value={device} onChange={(v) => { setDevice(v); setPage(0); }} names={all.map((s) => s.computer_name)} />
             <label class="field">Sort
               <select value={sortKey} onChange={(e) => { setSortKey(e.currentTarget.value); setPage(0); }}>
                 {SERVER_SORTS.map((o) => <option key={o.key} value={o.key}>{o.label}</option>)}
@@ -173,9 +174,9 @@ export function ServerHealth({ title }) {
               <button type="button" class="btn small" onClick={() => setSignal((x) => ({ open: false, version: x.version + 1 }))}>Collapse All</button>
             </div>
           </div>
-          <div class="stats stats-4">
+          <div class="row">
             {tiles.map(({ key, ...t }) => (
-              <StatCard key={t.label} {...t} scope="servers" active={key ? !!active[key] : undefined} onClick={key ? () => toggle(key) : undefined} />
+              <StatCard key={t.label} {...t} scope="servers" cols={TILE_COLS_THREE} active={key ? !!active[key] : undefined} onClick={key ? () => toggle(key) : undefined} />
             ))}
           </div>
           <FilterBubbles items={bubbles} />

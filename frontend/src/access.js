@@ -3,7 +3,17 @@
 export const USERNAME = /^[\w.@+-]{1,150}$/;
 export const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
-export const emptyPerson = () => ({ username: '', first_name: '', last_name: '', email: '', client_groups: [], is_staff: false, company: '' });
+export const emptyPerson = () => ({ username: '', first_name: '', last_name: '', email: '', client_groups: [], access: 'employee', company: '' });
+
+// The page's tabs, in the order the owner asked for (12 Nov 2026).
+export const ACCESS_TABS = [['overview', 'Overview'], ['employees', 'Employees'], ['groups', 'Client Groups']];
+
+// Access control, for now only two levels: an Admin sees every client of their company and manages people; an Employee sees what their client groups (and any
+// clients given one by one) give them. The platform owner is above both, and is not set from this page. On the server an Admin is `is_staff`.
+export const ACCESS_LEVELS = [['employee', 'Employee'], ['admin', 'Admin']];
+export const accessOf = (user) => (user.is_owner ? 'owner' : user.is_staff ? 'admin' : 'employee');
+export const accessLabel = (level) => (level === 'owner' ? 'Owner' : (ACCESS_LEVELS.find(([k]) => k === level) ?? [, level])[1]);
+export const accessRequest = (level) => ({ is_staff: level === 'admin' });
 
 // A sentence saying what is wrong with a new person, or '' when it can be sent. `taken` are the usernames that already exist.
 export function personProblem(draft, taken = []) {
@@ -18,13 +28,13 @@ export function personProblem(draft, taken = []) {
 }
 
 // What is sent to make a person. The company is only sent when one was chosen (the platform owner chooses; an administrator's is their own), and being an
-// administrator only when asked for. No password is ever part of it.
+// Admin only when asked for. No password is ever part of it.
 export function personRequest(draft) {
   const body = {
     username: draft.username.trim(), email: draft.email.trim(), first_name: (draft.first_name ?? '').trim(), last_name: (draft.last_name ?? '').trim(),
     client_groups: (draft.client_groups ?? []).map(Number),
   };
-  if (draft.is_staff) body.is_staff = true;
+  if (draft.access === 'admin') body.is_staff = true;
   if (draft.company !== '' && draft.company != null) body.company = Number(draft.company);
   return body;
 }

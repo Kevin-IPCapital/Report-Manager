@@ -2,15 +2,15 @@ import { useState } from 'preact/hooks';
 import { api } from '../api/adapter';
 import { DataAsOf } from '../components/DataAsOf';
 import { PageHeader } from '../components/PageHeader';
-import { DeviceFilter } from '../components/DeviceFilter';
+import { ClientDeviceFilters } from '../components/ClientDeviceFilters';
 import { Donut } from '../components/Donut';
 import { BarChart } from '../components/BarChart';
 import { ChartControls } from '../components/ChartCard';
 import { DetailModal, fact } from '../components/DetailModal';
-import { StatCard, DataTable, ErrorNote, FilterBubbles } from '../components/ui';
+import { StatCard, TILE_COLS_THREE, DataTable, ErrorNote, FilterBubbles } from '../components/ui';
 import { useApi } from '../components/useApi';
-import { matchesDevice } from '../filter';
-import { isFilters, isText } from '../persisted';
+import { clientChoices, matchesClients, matchesDevices } from '../filter';
+import { isFilters, isStrings } from '../persisted';
 import { usePersistentState } from '../state/persist';
 import { worstBackups } from '../worst';
 import { formatBytes, titleCase } from '../text';
@@ -28,6 +28,10 @@ const DIMENSIONS = [
   { key: 'flag_category', label: 'Red Flag Category', chart: 'Red Flags By Category', unit: 'flags', bar: true, tally: (r) => r.flags.map((f) => categoryLabel(f.category)) },
 ];
 
+// The filter behind the Red Flags tile: a device with at least one red flag. It filters like a chart does, but has no chart of its own.
+const FLAG_FILTER = { key: 'flagged', label: 'Red Flags', tally: (r) => ((r.red_flag_count ?? 0) > 0 ? ['Has red flags'] : []) };
+const FILTERS = [...DIMENSIONS, FLAG_FILTER];
+
 const tallyBy = (rows, dimension) => {
   const counts = new Map();
   for (const row of rows) for (const label of dimension.tally(row)) counts.set(label, (counts.get(label) ?? 0) + 1);
@@ -43,8 +47,9 @@ const m365Line = (s) => `${s.source_label}: ${s.enabled ? 'enabled' : 'not enabl
 export function Backups({ title }) {
   const { data, error } = useApi(() => api.getSection('backups'), []);
   const [savedFilters, setFilters] = usePersistentState('backups:filters', {}, isFilters);   // remembered between visits
-  const [device, setDevice] = usePersistentState('backups:device', '', isText);
-  const filters = Object.fromEntries(Object.entries(savedFilters).filter(([k]) => DIMENSIONS.some((d) => d.key === k)));
+  const [clients, setClients] = usePersistentState('backups:clients', [], isStrings());   // the clients chosen in the client filter
+  const [devices, setDevices] = usePersistentState('backups:devices', [], isStrings());   // the devices chosen in the device filter
+  const filters = Object.fromEntries(Object.entries(savedFilters).filter(([k]) => FILTERS.some((d) => d.key === k)));
   const [pick, setPick] = useState(null);   // { row, detail, error } while a device card is open
 
   // Same value again (or empty) removes the filter; a different value replaces it.
@@ -59,22 +64,21 @@ export function Backups({ title }) {
   };
 
   const all = data?.rows ?? [];
-  const rows = worstBackups(all.filter((r) => DIMENSIONS.every((d) => !filters[d.key] || d.tally(r).includes(filters[d.key])) && matchesDevice(device, r.device_name, r.hostname)));
+  const clientOptions = clientChoices(all, (r) => r.client_id, (r) => r.customer);
+  const narrowed = all.filter((r) => matchesClients(clients, r.client_id, r.customer) && matchesDevices(devices, r.device_name, r.hostname));
+  const rows = worstBackups(narrowed.filter((r) => FILTERS.every((d) => !filters[d.key] || d.tally(r).includes(filters[d.key]))));
   const count = (pred) => rows.filter(pred).length;
   const health = (h) => count((r) => r.health === h);
   const tiles = [
     { label: 'Devices', value: rows.length },
-    { label: 'OK', value: health('OK'), status: 'good', filter: ['health', 'OK'] },
     { label: 'Warning', value: health('WARNING'), status: health('WARNING') ? 'warn' : 'good', filter: ['health', 'WARNING'] },
     { label: 'Critical', value: health('CRITICAL'), status: health('CRITICAL') ? 'bad' : 'good', filter: ['health', 'CRITICAL'] },
-    { label: 'Red Flags', value: rows.reduce((sum, r) => sum + (r.red_flag_count ?? 0), 0) },
+    { label: 'Red Flags', value: rows.reduce((sum, r) => sum + (r.red_flag_count ?? 0), 0), filter: ['flagged', 'Has red flags'] },
     { label: 'Used Storage', value: formatBytes(rows.reduce((sum, r) => sum + (r.used_storage_bytes ?? 0), 0)) },
     { label: 'Servers', value: count((r) => r.device_type === 'Server') },
-    { label: 'Microsoft 365', value: count((r) => r.device_type === 'Microsoft 365') },
   ];
   const bubbles = [
-    ...DIMENSIONS.filter((d) => filters[d.key]).map((d) => ({ label: d.label, value: filters[d.key], onRemove: () => toggle(d.key, null) })),
-    ...(device.trim() ? [{ label: 'Device', value: device.trim(), onRemove: () => setDevice('') }] : []),
+    ...FILTERS.filter((d) => filters[d.key]).map((d) => ({ label: d.label, value: filters[d.key], onRemove: () => toggle(d.key, null) })),
   ];
 
   const card = pick && (() => {
@@ -113,14 +117,14 @@ export function Backups({ title }) {
       )}
       {data?.loaded && (
         <>
-          <div class="toolbar"><DeviceFilter value={device} onChange={setDevice} names={all.flatMap((r) => [r.device_name, r.hostname])} /></div>
-          <div class="stats stats-4">
+          <ClientDeviceFilters clients={clients} onClients={setClients} clientOptions={clientOptions} devices={devices} onDevices={setDevices} deviceNames={all.flatMap((r) => [r.device_name, r.hostname])} />
+          <div class="row">
             {tiles.map(({ filter, ...t }) => (
-              <StatCard key={t.label} {...t} scope="backups" active={filter ? filters[filter[0]] === filter[1] : undefined} onClick={filter ? () => toggle(filter[0], filter[1]) : undefined} />
+              <StatCard key={t.label} {...t} scope="backups" cols={TILE_COLS_THREE} active={filter ? filters[filter[0]] === filter[1] : undefined} onClick={filter ? () => toggle(filter[0], filter[1]) : undefined} />
             ))}
           </div>
           <ChartControls>
-            <div class="charts">
+            <div class="row">
               {DIMENSIONS.map((d) => {
                 const labels = [...tallyBy(all, d).entries()].sort((a, b) => b[1] - a[1]).map(([label]) => label);   // stable order and colours across filters
                 const colorOf = d.colour ?? ((l) => PALETTE[labels.indexOf(l) % PALETTE.length]);
